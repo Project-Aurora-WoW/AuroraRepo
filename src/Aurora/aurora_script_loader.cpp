@@ -13,6 +13,7 @@ void AddSC_aurora_online_rewards();
 void AddSC_aurora_daily_streak();
 void AddSC_aurora_voting_engine();
 void AddSC_aurora_visual_enchants();
+void AddSC_aurora_lore();
 void AddSC_night_of_the_fallen();
 void AddSC_boss_malakor();
 void AddSC_boss_vespera();
@@ -33,6 +34,7 @@ void AddAuroraScripts()
     AddSC_aurora_daily_streak();
     AddSC_aurora_voting_engine();
     AddSC_aurora_visual_enchants();
+    AddSC_aurora_lore();
 
     // Campaign #1 - Night of the Fallen
     AddSC_night_of_the_fallen();

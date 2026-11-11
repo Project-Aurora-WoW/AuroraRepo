@@ -18,6 +18,7 @@ set(AURORA_CORE_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/Core/aurora_activity_bridge.cpp
     ${CMAKE_CURRENT_LIST_DIR}/Core/aurora_event_rewards.cpp
     ${CMAKE_CURRENT_LIST_DIR}/Core/aurora_visual_enchants.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/Core/aurora_lore.cpp
 )
 
 set(AURORA_CAMPAIGN01_SOURCES
