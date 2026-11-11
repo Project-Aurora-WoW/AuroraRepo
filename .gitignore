@@ -36,3 +36,4 @@ desktop.ini
 # ---- python ----
 __pycache__/
 *.pyc
+mpq/patch-Z-merged.MPQ
