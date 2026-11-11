@@ -105,8 +105,67 @@ VALUES
   (50061,15,0,'Факел Сумерек',4091,2,64,1,50000,0,0,80,80,1,1,'Игрушка'),
   (50203,4,1,'Маска Эониса',33429,3,0,1,100000,20000,1,80,80,1,1,'Трансмогрификация'),
   (50204,15,0,'Знамя Ночи',15365,3,64,1,50000,0,0,80,80,1,1,'Игрушка'),
-  (50205,4,1,'Перчатки Теневого Гонга',33429,3,0,1,80000,16000,10,80,80,1,1,'Трансмогрификация');
+  (50205,4,1,'Перчатки Теневого Гонга',33429,3,0,1,80000,16000,10,80,80,1,1,'Трансмогрификация'),
 
+  -- Campaign sets. item_template keeps the 16-column shape used everywhere else
+-- in this file; stats, armour and weapon damage are applied below by UPDATE so
+-- the REPLACE INTO stays compatible with stock AzerothCore item_template.
+REPLACE INTO `item_template`
+  (`entry`,`class`,`subclass`,`name`,`displayid`,`Quality`,`Flags`,`BuyCount`,`BuyPrice`,`SellPrice`,
+   `InventoryType`,`ItemLevel`,`RequiredLevel`,`Stackable`,`bonding`,`description`)
+VALUES
+  (50300,4,4,'Нагрудник Стража Рассвета',1000,4,0,1,800000,160000,5,200,80,1,1,'Комплект Стража Рассвета'),
+  (50301,4,4,'Ноги Стража Рассвета',1000,4,0,1,600000,120000,7,200,80,1,1,'Комплект Стража Рассвета'),
+  (50302,4,4,'Плечи Стража Рассвета',1000,4,0,1,400000,80000,3,200,80,1,1,'Комплект Стража Рассвета'),
+  (50303,4,4,'Шлем Стража Рассвета',1000,4,0,1,400000,80000,1,200,80,1,1,'Комплект Стража Рассвета'),
+  (50304,4,4,'Перчатки Стража Рассвета',1000,4,0,1,300000,60000,10,200,80,1,1,'Комплект Стража Рассвета'),
+
+  (50310,4,2,'Кираса Теневого Охотника',1000,4,0,1,800000,160000,5,200,80,1,1,'Комплект Теневого Охотника'),
+  (50311,4,2,'Поножи Теневого Охотника',1000,4,0,1,600000,120000,7,200,80,1,1,'Комплект Теневого Охотника'),
+  (50312,4,2,'Наплечники Теневого Охотника',1000,4,0,1,400000,80000,3,200,80,1,1,'Комплект Теневого Охотника'),
+  (50313,4,2,'Капюшон Теневого Охотника',1000,4,0,1,400000,80000,1,200,80,1,1,'Комплект Теневого Охотника'),
+  (50314,4,2,'Рукавицы Теневого Охотника',1000,4,0,1,300000,60000,10,200,80,1,1,'Комплект Теневого Охотника'),
+
+  (50320,4,1,'Одеяние Весталки',1000,4,0,1,800000,160000,20,200,80,1,1,'Комплект Весталки'),
+  (50321,4,1,'Штаны Весталки',1000,4,0,1,600000,120000,7,200,80,1,1,'Комплект Весталки'),
+  (50322,4,1,'Оплечье Весталки',1000,4,0,1,400000,80000,3,200,80,1,1,'Комплект Весталки'),
+  (50323,4,1,'Венец Весталки',1000,4,0,1,400000,80000,1,200,80,1,1,'Комплект Весталки'),
+  (50324,4,1,'Стяжатели Весталки',1000,4,0,1,300000,60000,10,200,80,1,1,'Комплект Весталки'),
+
+  (50330,2,7,'Клинок Стража Рассвета',1000,4,0,1,900000,180000,13,200,80,1,1,'Оружие комплекта Стража'),
+  (50331,2,2,'Лук Теневого Охотника',1000,4,0,1,900000,180000,15,200,80,1,1,'Оружие комплекта Охотника'),
+  (50332,2,10,'Посох Весталки',1000,4,0,1,900000,180000,17,200,80,1,1,'Оружие комплекта Весталки'),
+  (50333,4,1,'Плащ Хранителя Собора',1000,4,0,1,500000,100000,16,200,80,1,1,'Плащ кампании'),
+  (50334,4,0,'Печать Равновесия',1000,4,0,1,700000,140000,12,200,80,1,1,'Аксессуар кампании');
+
+-- Stats. displayid 1000 is the stock "question mark" placeholder: swap each
+-- model for a real WotLK displayid once the art is chosen.
+UPDATE `item_template` SET `armor`=2426, `stat_type1`=7, `stat_value1`=120, `stat_type2`=3, `stat_value2`=80 WHERE `entry`=50300;
+UPDATE `item_template` SET `armor`=2123, `stat_type1`=7, `stat_value1`=95,  `stat_type2`=3, `stat_value2`=60 WHERE `entry`=50301;
+UPDATE `item_template` SET `armor`=1592, `stat_type1`=7, `stat_value1`=70,  `stat_type2`=3, `stat_value2`=45 WHERE `entry`=50302;
+UPDATE `item_template` SET `armor`=1819, `stat_type1`=7, `stat_value1`=70,  `stat_type2`=3, `stat_value2`=50 WHERE `entry`=50303;
+UPDATE `item_template` SET `armor`=1326, `stat_type1`=7, `stat_value1`=60,  `stat_type2`=3, `stat_value2`=40 WHERE `entry`=50304;
+
+UPDATE `item_template` SET `armor`=3044, `stat_type1`=3, `stat_value1`=150, `stat_type2`=7, `stat_value2`=90 WHERE `entry`=50310;
+UPDATE `item_template` SET `armor`=2663, `stat_type1`=3, `stat_value1`=120, `stat_type2`=7, `stat_value2`=70 WHERE `entry`=50311;
+UPDATE `item_template` SET `armor`=1997, `stat_type1`=3, `stat_value1`=90,  `stat_type2`=7, `stat_value2`=55 WHERE `entry`=50312;
+UPDATE `item_template` SET `armor`=2204, `stat_type1`=3, `stat_value1`=90,  `stat_type2`=7, `stat_value2`=60 WHERE `entry`=50313;
+UPDATE `item_template` SET `armor`=1663, `stat_type1`=3, `stat_value1`=75,  `stat_type2`=7, `stat_value2`=50 WHERE `entry`=50314;
+
+UPDATE `item_template` SET `armor`=1819, `stat_type1`=5, `stat_value1`=150, `stat_type2`=6, `stat_value2`=100 WHERE `entry`=50320;
+UPDATE `item_template` SET `armor`=1592, `stat_type1`=5, `stat_value1`=120, `stat_type2`=6, `stat_value2`=85  WHERE `entry`=50321;
+UPDATE `item_template` SET `armor`=1194, `stat_type1`=5, `stat_value1`=90,  `stat_type2`=6, `stat_value2`=60  WHERE `entry`=50322;
+UPDATE `item_template` SET `armor`=1326, `stat_type1`=5, `stat_value1`=90,  `stat_type2`=6, `stat_value2`=65  WHERE `entry`=50323;
+UPDATE `item_template` SET `armor`=995,  `stat_type1`=5, `stat_value1`=75,  `stat_type2`=6, `stat_value2`=55  WHERE `entry`=50324;
+
+UPDATE `item_template` SET `dmg_min1`=214, `dmg_max1`=398, `dmg_type1`=0, `delay`=2600, `stat_type1`=3, `stat_value1`=90, `stat_type2`=7, `stat_value2`=60 WHERE `entry`=50330;
+UPDATE `item_template` SET `dmg_min1`=271, `dmg_max1`=504, `dmg_type1`=0, `delay`=2800, `stat_type1`=3, `stat_value1`=80, `stat_type2`=7, `stat_value2`=55 WHERE `entry`=50331;
+UPDATE `item_template` SET `dmg_min1`=186, `dmg_max1`=346, `dmg_type1`=0, `delay`=3100, `stat_type1`=5, `stat_value1`=120,`stat_type2`=6, `stat_value2`=80 WHERE `entry`=50332;
+UPDATE `item_template` SET `armor`=1101, `stat_type1`=5, `stat_value1`=70, `stat_type2`=7, `stat_value2`=50 WHERE `entry`=50333;
+UPDATE `item_template` SET `stat_type1`=3, `stat_value1`=85, `stat_type2`=7, `stat_value2`=65 WHERE `entry`=50334;
+
+-- NOTE: set bonuses need ItemSet.dbc in the client patch; item_template has no
+-- setID column in AzerothCore, so no server-side set mapping is written here.
 -- mount spells (spell_1)
 UPDATE `item_template` SET `spellid_1`=60050, `spelltrigger_1`=0, `spellcharges_1`=-1 WHERE `entry`=50050;
 UPDATE `item_template` SET `spellid_1`=60051, `spelltrigger_1`=0, `spellcharges_1`=-1 WHERE `entry`=50051;
@@ -432,7 +491,15 @@ VALUES
   (9,'fall_of_altars','Падение Алтарей','Fall of the Altars',
      'Тьма поглощает алтари Ночного города — верните их свету',
      'Darkness swallows the altars of the Night City - return them to the light',
-     'weekly',5,'time','SUN:21:00',950,0,30009,1);
+     'weekly',5,'time','SUN:21:00',950,0,30009,1),
+  (10,'keeper_conclave','Собор Хранителей','Keeper Conclave',
+     'Хранители Равновесия собираются на совет и раздают дары',
+     'The Keepers of Balance gather in conclave and hand out gifts',
+     'weekly',3,'time','WED:19:00',0,0,30010,1),
+  (11,'shard_rain','Звёздный Ливень','Shard Rain',
+     'Осколки падших звёзд сыплются на земли Азерота',
+     'Shards of fallen stars rain down on the lands of Azeroth',
+     'monthly',48,'calendar','10-12',0,0,30011,1);
 
 REPLACE INTO `aurora_event_rewards`
   (`id`,`event_id`,`tier`,`requirement_type`,`requirement_value`,
@@ -447,7 +514,17 @@ VALUES
   (6,9,'participation','time',30,0,1,0,3,0,0,'Участие в защите алтарей','Altar defence participation'),
   (7,9,'bronze','kills',25,0,1,0,8,0,0,'10 осколков','10 Shards'),
   (8,9,'silver','bosses',1,0,1,30,15,0,0,'30 Очков Авроры','30 Aurora Points'),
-  (9,9,'gold','time',180,50030,1,50,25,0,0,'Сундук Алтаря','Altar Chest');
+  (9,9,'gold','time',180,50030,1,50,25,0,0,'Сундук Алтаря','Altar Chest'),
+
+  (10,10,'participation','time',30,0,1,0,3,0,0,'Присутствие на Соборе','Conclave attendance'),
+  (11,10,'bronze','time',60,0,1,15,8,0,0,'15 Очков Авроры','15 Aurora Points'),
+  (12,10,'silver','quests',2,0,1,35,15,0,0,'35 Очков Авроры','35 Aurora Points'),
+  (13,10,'gold','time',180,0,1,80,40,0,0,'Упоение Собора','Conclave Bounty'),
+
+  (14,11,'participation','time',30,0,1,0,4,0,0,'Участие в Ливне','Shard Rain participation'),
+  (15,11,'bronze','kills',40,0,1,0,12,0,0,'Вскрытый осколок','Cracked Shard'),
+  (16,11,'silver','kills',120,0,1,25,25,0,0,'Серебро Ливня','Shard Silver'),
+  (17,11,'legendary','time',600,0,1,0,0,102,'Тень Ноктиса','Shadow of Nyctos');
 
 -- ============================================================================
 -- 15. SHOP
