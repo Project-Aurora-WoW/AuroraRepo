@@ -6,7 +6,7 @@
 
 ## Что внутри
 
-**`src/Aurora/`** — серверный модуль, встраивается в `AzerothCore/src/server/scripts/Aurora/`
+**`modules/mod-aurora/`** — серверный модуль, кладётся в `<AzerothCore>/modules/mod-aurora/`
 
 | Файл | Назначение |
 |---|---|

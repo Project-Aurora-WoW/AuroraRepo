@@ -1,93 +1,68 @@
 # Aurora — сборка и подключение
 
 Целевая платформа: **AzerothCore master (3.3.5a)**.
-Ничего из стокового ядра не патчится — только добавляются новые файлы.
+Ничего из стокового ядра не патчится — модуль ставится как обычный модуль AC.
 
 ## 1. Куда положить
 
 ```
-<AzerothCore>/src/server/scripts/Aurora/
+<AzerothCore>/modules/mod-aurora/
 ├── CMakeLists.txt
-├── Core/
-│   ├── aurora_config.h
-│   ├── aurora_shared.h
-│   ├── aurora_shared.cpp
-│   ├── aurora_bootstrap.cpp
-│   └── aurora_commands.cpp
-└── Campaigns/            (добавляется по мере готовности)
+├── data/sql/
+│   ├── db-world/        2026_11_10_00 … 07
+│   └── db-characters/   2026_11_10_00 … 08
+└── src/Aurora/
+    ├── aurora_script_loader.cpp
+    ├── Core/
+    └── Campaigns/Campaign01_NightOfTheFallen/
 ```
 
-`src/server/scripts/CMakeLists.txt` в stock AC рекурсивно собирает всё содержимое
-`scripts/`, поэтому достаточно скопировать папку `Aurora/` — пересборка подхватит
-файлы через `CONFIGURE_DEPENDS`. Если ваша сборка использует явные `add_subdirectory`,
-добавьте одну строку:
+Это стандартная раскладка модулей AzerothCore. Модули подключаются из
+`modules/CMakeLists.txt` ядра, поэтому:
 
-```cmake
-add_subdirectory(Aurora)
+- после `git pull` ядро видит модуль без правок `src/`;
+- обновление ядра не затрагивает код модуля;
+- удаление модуля — просто удаление каталога.
+
+## 2. Сборка
+
+```bash
+./acore.sh compiler build
 ```
 
-## 2. Разрешение модулей в ScriptLoader
+(или обычный `cmake --build build --target worldserver`). CMake модуля
+добавляет свои `.cpp` к существующей цели `scripts` — второй библиотеки не
+создаётся, ничего с ядром не конфликтует.
 
-Файл `<AzerothCore>/src/server/scripts/ScriptLoader.cpp`.
+В логе конфигурации должна появиться строка:
 
-**Способ A — явные объявления (надёжнее).** В начало файла:
-
-```cpp
-// AURORA
-void AddSC_aurora_bootstrap();
-void AddSC_aurora_commandscript();
 ```
-
-В конец `AddScripts()` — **после** всех стоковых `AddSC_*`, чтобы наши скрипты
-получили приоритет при конфликте имён:
-
-```cpp
-    // ===== AURORA =====
-    AddSC_aurora_bootstrap();
-    AddSC_aurora_commandscript();
+[AURORA] module mod-aurora: <список исходников>
 ```
-
-> Почему не через ScriptName в БД: команды (`CommandScript`) не имеют колонки
-> `ScriptName` в `creature_template`, поэтому их нельзя включить правкой данных.
-> Явный вызов из `LoadScriptNames()` гарантирует загрузку.
-
-**Способ B — если не хотите трогать ScriptLoader.** Добавьте в конец
-`<AzerothCore>/src/server/scripts/CMakeLists.txt`:
-
-```cmake
-target_sources(scripts PRIVATE
-    ${CMAKE_CURRENT_SOURCE_DIR}/Aurora/Core/aurora_shared.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/Aurora/Core/aurora_bootstrap.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/Aurora/Core/aurora_commands.cpp
-)
-```
-
-и в `ScriptLoader.cpp` вызовы из способа A остаются обязательными.
 
 ## 3. База данных
 
-Порядок применения:
+Файлы лежат парами с одинаковым именем: дата `2026_11_10` и порядковый
+номер `00…08`. Порядок применения — по номеру в пределах каждой базы.
 
-| # | Файл | База |
+| # | `db-world` | `db-characters` |
 |---|---|---|
-| 1 | `sql/01_aurora_schema.sql` | world (раздел 1) + character (раздел 2) |
-| 2 | `sql/02_aurora_world_data.sql` | world |
-| 3 | `sql/03_aurora_spawns.sql` | world |
-| 4 | `sql/04_character_procedures.sql` | **character** |
-| 5 | `sql/06_aurora_shop_purchases.sql` | character |
+| 00 | схема: таблицы `aurora_*` для world | схема: таблицы `aurora_*` для character |
+| 01 | данные мира: кампании, NPC, предметы, квесты, магазин, эвенты | — |
+| 02 | спавны NPC и алтарей, порталы | — |
+| 03 | — | процедуры `sp_Aurora*` + `aurora_v_weights` |
+| 04 | — | журнал покупок, счётчики кампании |
+| 05 | — | `aurora_shop_purchases` |
+| 06 | тексты gossip | — |
+| 07 | RBAC-права `.aurora shop buy` / `.aurora vote cast` | — |
+| 08 | — | `aurora_pending_grants` |
 
 ```bash
-mysql -u root -p acore_world      < sql/01_aurora_schema.sql
-mysql -u root -p acore_world      < sql/02_aurora_world_data.sql
-mysql -u root -p acore_world      < sql/03_aurora_spawns.sql
-mysql -u root -p acore_character  < sql/04_character_procedures.sql
-mysql -u root -p acore_character  < sql/06_aurora_shop_purchases.sql
+mysql -u root -p acore_world      < modules/mod-aurora/data/sql/db-world/2026_11_10_00.sql
+mysql -u root -p acore_world      < modules/mod-aurora/data/sql/db-world/2026_11_10_01.sql
+...
+mysql -u root -p acore_character  < modules/mod-aurora/data/sql/db-characters/2026_11_10_08.sql
 ```
-
-`01_aurora_schema.sql` содержит две секции в одном файле: раздел 1 — таблицы
-world, раздел 2 — таблицы character. Если применяете автоматически, выполните
-разделы на соответствующих базах либо прогоните файл на обе — `CREATE TABLE IF NOT EXISTS`
-безопасен, лишние таблицы просто окажутся неиспользуемыми.
 
 **Процедуры — только на character.** Все таблицы, которые они читают и
 пишут (`aurora_player_activity`, `aurora_vote_candidates`, `aurora_votes`,
@@ -102,7 +77,7 @@ world, раздел 2 — таблицы character. Если применяет�
 ```sql
 -- world
 SELECT COUNT(*) FROM aurora_campaigns;        -- 17
-SELECT COUNT(*) FROM aurora_events;           -- 8
+SELECT COUNT(*) FROM aurora_events;           -- 9
 SELECT COUNT(*) FROM aurora_shop_items;       -- 15
 SELECT COUNT(*) FROM aurora_visual_enchants;  -- 8
 SELECT COUNT(*) FROM quest_template WHERE ID BETWEEN 90001 AND 90999; -- 18
@@ -111,6 +86,15 @@ SELECT COUNT(*) FROM quest_template WHERE ID BETWEEN 90001 AND 90999; -- 18
 SHOW PROCEDURE STATUS WHERE Db = DATABASE() AND Name LIKE 'sp_Aurora%';  -- 6
 SHOW TABLES LIKE 'aurora_v_weights';          -- 1
 ```
+
+### Автоапдейтер
+
+Файлы можно отдать автоапдейтеру AC: скопировать `db-world/*.sql` в
+`$AC_DATA_DIR/sql/updates/world/` и `db-characters/*.sql` в
+`$AC_DATA_DIR/sql/updates/character/`, сохранив имена `YYYY_MM_DD_NN.sql`
+(AC применяет их по порядку даты/номера и пишет в таблицу `updates`). Имена
+уже в этом формате и с датой позже текущей ревизии ядра, поэтому подхватятся
+после рестарта при включённом `Updater.Updates.EnableDatabases`.
 
 ## 4. Конфигурация
 
@@ -125,8 +109,7 @@ Aurora.Voting.Enabled = 1
 Aurora.Localization.Default = ruRU
 ```
 
-(Эти ключи пока не читаются — модуль берёт значения из заголовка. Подключение
-Config остаётся на следующий срез.)
+(Эти ключи пока не читаются — модуль берёт значения из заголовка.)
 
 ## 5. Команды после сборки
 
@@ -136,43 +119,46 @@ Config остаётся на следующий срез.)
 .aurora activity        — личная статистика (Activity-First)
 .aurora shop            — каталог
 .aurora shop buy <id>   — покупка
-.shop                   — псевдоним каталога
+.aurora campaign        — прогресс кампании, серия входов, часы онлайн
 .aurora vote list       — кандидаты текущего месяца
 .aurora vote top        — победители прошлых периодов
 .aurora vote cast pve 1 — голос
-.vote stats             — псевдоним .aurora activity
 .aurora reload shop     — перечитать каталог (RBAC: administrator)
 ```
 
-Права команд по умолчанию `RBAC_PERM_COMMAND_HELP` — то есть любому игроку.
-Чтобы закрыть покупки для обычных игроков, поменяйте флаг у `HandleShopBuyCommand`
-на нужный `RBAC_PERM_*` из `RBAC.h`.
+Права на чтение — `RBAC_PERM_COMMAND_HELP` (любой игрок). Покупка и голос
+закрыты собственными правами `RBAC_PERM_COMMAND_AURORA_SHOP` /
+`RBAC_PERM_COMMAND_AURORA_VOTE`, которые выдаются файлом `db-world/07`.
 
-## 6. Что требуется проверить на живом ядре
+## 6. Что требует проверки на живом ядре
 
 Часть API в AC master меняется между релизами. Перед сборкой сверьте:
 
 - `player->GetSession()->GetSessionDbcLocale()` — тип возврата;
 - `ChatHandler::PSendSysMessage` с `{}` — используется `StringFormat`, нужен
   `#include "StringFormat.h"` (уже включён);
-- `player->CanStoreNewItem(NULL_BAG, NULL_SLOT, ITEM_NONE, nullptr)` — сигнатура
-  в вашей ревизии принимает `Item**`; если нет — замените на проверку
-  `player->GetFreeInventorySpace()` (или аналог в вашей ветке);
-- `Item::SetState` — не обязателен, уберите, если метод не публичный;
+- `player->CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, entry, count)` — модуль
+  использует вариант с `ItemPosCountVec dest`, он же нужен для `StoreNewItem`;
 - `Field::IsNull()` — присутствует с AC 2022+.
 
-Если что-то из этого не совпадёт с вашей ревизией — пришлите вывод компилятора,
-я поправлю точечно.
+Если что-то из этого не совпадёт с вашей ревизией — пришлите вывод компилятора.
 
-## 7. Состав среза v7.1.0 (срез 2)
+## 7. Состав модуля v7.1.0
 
 | Файл | Что делает |
 |---|---|
 | `Core/aurora_config.h` | константы, диапазоны ID, тайминги |
 | `Core/aurora_shared.h/.cpp` | enum'ы, ID-хелперы, реестр карт |
 | `Core/aurora_bootstrap.cpp` | старт: проверка таблиц, загрузка каталога магазина |
-| `Core/aurora_commands.cpp` | `.aurora shop/vote/activity`, алиасы `.shop`,`.vote` |
-| `Core/aurora_activity_bridge.cpp` | счётчики активности, flush раз в минуту, награды за ачивки |
+| `Core/aurora_commands.cpp` | `.aurora shop/vote/campaign/activity/version/reload` |
+| `Core/aurora_activity_bridge.cpp` | счётчики активности, flush раз в минуту, отложенные награды |
+| `Core/aurora_event_manager.cpp` | планировщик эвентов (time / calendar / activity) |
+| `Core/aurora_event_rewards.cpp` | ярусы наград, выдача онлайн и офлайн-игрокам |
+| `Core/aurora_online_rewards.cpp` | награды за онлайн по порогам |
+| `Core/aurora_daily_streak.cpp` | 7-дневная серия входов |
+| `Core/aurora_voting_engine.cpp` | пересчёт баллов и выплаты победителям |
+| `Core/aurora_visual_enchants.cpp` | визуальные энчанты: владение и применение |
+| `Core/aurora_lore.cpp` | хроники кампании |
 | `Campaigns/…/campaign01.h/.cpp` | общие объявления кампании и таблица эффектов алтарей |
 | `Campaigns/…/night_of_the_fallen.cpp` | InstanceScript: захват алтарей, снятие щита, энрейдж |
 | `Campaigns/…/boss_malakor.cpp` | Малакор: щит, переход в бой, адды, энрейдж |
@@ -193,35 +179,20 @@ Config остаётся на следующий срез.)
 7. 4 алтаря → бонус −75% брони и +100% урона по боссу.
 
 Вся логика захвата живёт в одном месте (InstanceScript). `go_shadow_altar.cpp`
-только показывает состояние и не дублирует расчёт — так две реализации
-не могут разойтись.
+только показывает состояние и не дублирует расчёт.
 
-## 9. Ограничения этого среза
+## 9. Ограничения
 
-- Достижения (`10001…10099`, `20001…20005`) **не выдаются**: нужен патч клиентских
-  `Achievement.dbc` / `Achievement_Criteria.dbc` / `CharTitles.dbc`. В таблицах
-  подготовлены правила и награды, C++ их выдаёт, но клиент не покажет
-  достижение, которого нет в DBC.
-- Эвенты: таблицы и награды заполнены, планировщик (срез 3) ещё не написан.
-- `aurora_shop_purchases` — в файле `06`, применяется на character-базу.
-- Спеллы `500010…500016`, `500020`, `500030`, `500001` и маунты `60050/60051`,
-  `70002/70003/70004` **должны быть заведены в `spell_dbc`** — скрипт их
-  только вызывает. Без них боссы просто не кастуют, но не падают.
+- Достижения (`10001…10099`, `20001…20005`) выдаются сервером, но клиент
+  покажет их только после патча `Achievement.dbc` / `Achievement_Criteria.dbc` /
+  `CharTitles.dbc` — см. `docs/DBC_PATCH.md`.
+- Спеллы `500010…500016`, `500020`, `500030`, `500001` и маунты
+  `60050/60051`, `70002/70003/70004` **должны быть заведены в `spell_dbc`** —
+  скрипт их только вызывает.
+- Ключи `Aurora.*` в `worldserver.conf` не читаются.
 
-## 10. Проверка синтаксиса (что реально было сделано)
+## 10. Проверка синтаксиса
 
-Все 10 файлов прогнаны через MSVC 19.51 (`cl /Zs`, C++20) с минимальными
-заглушками AC-API. Найдено и исправлено в процессе:
-
-- `InstanceScript`/`Map` вызов несуществующего `UpdateEncounterStateForKilledCreature`;
-- `GetSource()` вместо `pair.second` при обходе игроков инстанса;
-- `Pending&` вместо `PendingCounters&` в четырёх хуках моста активности;
-- `Pending player_guid` — переменная с именем, совпадающим с полем структуры.
-
-Финальный статус: 9 из 10 файлов — чисто. `aurora_commands.cpp` требует
-подтверждения на живом ядре по трём местам: сигнатура `CanStoreNewItem`,
-необходимость `Item::SetState`, а также способ сборки `ChatCommand`-таблиц
-(в зависимости от ревизии `ChildCommands` — `std::vector` или `ChatCommand const*`).
-
-Это проверка **синтаксиса и логики типов**, а не линковка: полноценная сборка
-возможна только внутри дерева AzerothCore.
+Файлы модуля прогонялись через MSVC (`cl /Zs`, C++20) с минимальными
+заглушками AC-API. Это проверка **синтаксиса и логики типов**, а не линковка:
+полноценная сборка возможна только внутри дерева AzerothCore.

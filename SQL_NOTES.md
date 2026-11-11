@@ -3,16 +3,18 @@
 Документ описывает, как раскладываются файлы по базам и что нельзя делать без патча клиента.
 
 ## Файлы
-
 | Файл | База | Что делает |
 |---|---|---|
-| `sql/01_aurora_schema.sql` | WORLD + CHARACTER (две части в одном файле, раздел 2 — character) | Создаёт кастомные таблицы `aurora_*`. Стоковые таблицы не трогает. |
-| `sql/02_aurora_world_data.sql` | WORLD | Кампании, локации, NPC/GO шаблоны, предметы, квесты, магазин, эвенты, награды. |
-| `sql/03_aurora_spawns.sql` | WORLD | Спавны NPC и алтарей на карте 950 и порталы в хабах. |
-| `sql/04_character_procedures.sql` | **CHARACTER** | Все процедуры `sp_Aurora*` + зеркало весов `aurora_v_weights`. |
-| `sql/05_character_extra_tables.sql` | CHARACTER | Журнал покупок, расчёты голосов, счётчики кампании, активности. |
-| `sql/06_aurora_shop_purchases.sql` | CHARACTER | Журнал покупок магазина (совместимость). |
-
+| `data/sql/db-world/2026_11_10_00.sql` | WORLD | Создаёт таблицы `aurora_*` для мира. Стоковые таблицы не трогает. |
+| `data/sql/db-world/2026_11_10_01.sql` | WORLD | Кампании, локации, NPC/GO шаблоны, предметы, квесты, магазин, эвенты, награды. |
+| `data/sql/db-world/2026_11_10_02.sql` | WORLD | Спавны NPC и алтарей на карте 950 и порталы в хабах. |
+| `data/sql/db-world/2026_11_10_06.sql` | WORLD | Тексты gossip-меню квестодателей. |
+| `data/sql/db-world/2026_11_10_07.sql` | WORLD | RBAC-права `.aurora shop buy` и `.aurora vote cast`. |
+| `data/sql/db-characters/2026_11_10_00.sql` | **CHARACTER** | Создаёт таблицы `aurora_*` для прогресса игроков. |
+| `data/sql/db-characters/2026_11_10_03.sql` | **CHARACTER** | Все процедуры `sp_Aurora*` + зеркало весов `aurora_v_weights`. |
+| `data/sql/db-characters/2026_11_10_04.sql` | CHARACTER | Журнал покупок, расчёты голосов, счётчики кампании, активности. |
+| `data/sql/db-characters/2026_11_10_05.sql` | CHARACTER | Журнал покупок магазина (совместимость). |
+| `data/sql/db-characters/2026_11_10_08.sql` | CHARACTER | Отложенные награды: титулы, энчанты, предметы, очки. |
 **Почему процедуры на character, а не на world.** Всё, что они читают и пишут
 (`aurora_player_activity`, `aurora_vote_candidates`, `aurora_votes`,
 `aurora_vote_winners`), создаётся в character-схеме. Ранее файл лежал на world,
