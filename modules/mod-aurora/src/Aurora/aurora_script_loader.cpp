@@ -23,6 +23,9 @@ void AddSC_go_shadow_altar();
 void AddSC_go_aurora_portal();
 void AddSC_npc_campaign01_questgivers();
 void AddSC_aurora_campaign01_achievements();
+void AddSC_npc_valdor_questgiver();
+void AddSC_npc_aurora_shopkeeper();
+void AddSC_npc_shadow_minion();
 
 void AddAuroraScripts()
 {
@@ -45,6 +48,9 @@ void AddAuroraScripts()
     AddSC_go_shadow_altar();
     AddSC_go_aurora_portal();
     AddSC_npc_campaign01_questgivers();
+    AddSC_npc_valdor_questgiver();
+    AddSC_npc_aurora_shopkeeper();
+    AddSC_npc_shadow_minion();
     AddSC_aurora_campaign01_achievements();
 }
 

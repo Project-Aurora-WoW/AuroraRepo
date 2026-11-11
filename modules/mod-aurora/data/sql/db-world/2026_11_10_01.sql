@@ -603,6 +603,72 @@ VALUES
      'The Alliance sees Malakor as a threat. The Horde sees a rival. But Eonis knows: true victory lies not in destruction, but in purification. Three paths lead to one goal. Which will you choose?',
      10033);
 
+-- ============================================================================
+-- 19. LOCALIZATION (ruRU)
+-- ------------------------------------------------------------
+-- The rows above put the Russian wording into `creature_template.name`,
+-- `npc_text.text0_0` and `item_template.name`. AzerothCore reads those as the
+-- "default" locale, so on an enUS client the same DB would hand the player
+-- Russian names. The *_locale tables below carry the localized variant the
+-- client asks for; `creature_template_locale` / `npc_text_locale` also keep a
+-- description so the tooltip is right on every locale.
+--
+-- Only ruRU rows are written: ruRU clients pick them up, enUS clients keep the
+-- default column, which in this module is already the Russian base wording.
+-- Swap the default columns for English if an enUS-first build is required.
+-- ============================================================================
+
+-- NOTE: `Name` / `SubName` come from the base row, so the ruRU module keeps
+-- Russian as the default and does not split it per locale. The ruRU rows are
+-- declared idempotently so a future English base can be added without a schema
+-- change.
+DELETE FROM `creature_template_locale` WHERE `entry` BETWEEN 150001 AND 150200;
+INSERT INTO `creature_template_locale` (`entry`,`locale`,`Name`,`Title`)
+SELECT `entry`, l.`locale`, ct.`name`, ct.`subname`
+FROM `creature_template` ct
+JOIN (SELECT 'ruRU' AS `locale`) l
+WHERE ct.`entry` BETWEEN 150001 AND 150200;
+
+-- Gossip greetings: 7001-7003 are the Alliance/Horde/neutral hubs, 7004 the
+-- shopkeeper, 7005 Valdor inside the campaign instance.
+REPLACE INTO `npc_text` (`ID`,`text0_0`,`lang0`,`Probability0`)
+VALUES
+  (7005,'Архимаг Вальдор держит Врата приоткрытыми: за ними Ночь Падших ждёт героев.',1,1);
+
+UPDATE `creature_template` SET `gossip_menu_id`=7005 WHERE `entry`=150010;
+
+DELETE FROM `npc_text_locale` WHERE `ID` BETWEEN 7001 AND 7005;
+INSERT INTO `npc_text_locale` (`ID`,`Locale`,`Text0_0`)
+SELECT `ID`, 'ruRU', `text0_0` FROM `npc_text` WHERE `ID` BETWEEN 7001 AND 7005;
+
+-- Item names for every project entry that carries a Russian base name.
+DELETE FROM `item_template_locale` WHERE `ID` BETWEEN 50000 AND 60099;
+INSERT INTO `item_template_locale` (`ID`,`locale`,`Name`,`Description`)
+SELECT `entry`, 'ruRU', `name`, `description`
+FROM `item_template`
+WHERE `entry` BETWEEN 50000 AND 60099;
+
+-- The shopkeeper sells the whole catalogue, but five stock items are missing
+-- from item_template, so the vendor row would be dropped by the core. The
+-- visual-enchant scrolls (60001-60004) are created here.
+REPLACE INTO `item_template`
+  (`entry`,`class`,`subclass`,`name`,`displayid`,`Quality`,`Flags`,`BuyCount`,`BuyPrice`,`SellPrice`,
+   `InventoryType`,`ItemLevel`,`RequiredLevel`,`Stackable`,`bonding`,`description`)
+VALUES
+  (60001,15,0,'Свиток: Сияние Авроры',50001,4,0,1,0,0,0,1,80,1,20,1,'Визуальный энчант «Сияние Авроры»'),
+  (60002,15,0,'Свиток: Тень Ноктиса',50001,4,0,1,0,0,0,1,80,1,20,1,'Визуальный энчант «Тень Ноктиса»'),
+  (60003,15,0,'Свиток: Пламя Рассвета',50001,4,0,1,0,0,0,1,80,1,20,1,'Визуальный энчант «Пламя Рассвета»'),
+  (60004,15,0,'Свиток: Призматический Блеск',50001,5,0,1,0,0,0,1,80,1,20,1,'Визуальный энчант «Призматический Блеск»');
+
+-- Vendors list: the shopkeeper (150200) offers the enabled catalogue. Prices
+-- stay 0 in the vendor view because the real price is checked in C++.
+REPLACE INTO `npc_vendor` (`entry`,`slot`,`item`,`maxcount`,`incrtime`,`ExtendedCost`)
+SELECT 150200, i.`id`, i.`item_entry`, 0, 0, 0
+FROM `aurora_shop_items` i
+WHERE i.`enabled` = 1
+ORDER BY i.`id`;
+
+
 
 
 

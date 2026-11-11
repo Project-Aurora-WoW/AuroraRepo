@@ -31,6 +31,9 @@ set(AURORA_CAMPAIGN01_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/Campaigns/Campaign01_NightOfTheFallen/npc_campaign01_questgivers.cpp
     ${CMAKE_CURRENT_LIST_DIR}/Campaigns/Campaign01_NightOfTheFallen/go_aurora_portal.cpp
     ${CMAKE_CURRENT_LIST_DIR}/Campaigns/Campaign01_NightOfTheFallen/aurora_campaign01_achievements.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/Campaigns/Campaign01_NightOfTheFallen/npc_valdor_questgiver.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/Campaigns/Campaign01_NightOfTheFallen/npc_aurora_shopkeeper.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/Campaigns/Campaign01_NightOfTheFallen/npc_shadow_minion.cpp
 )
 
 set(AURORA_SOURCES ${AURORA_CORE_SOURCES} ${AURORA_CAMPAIGN01_SOURCES})
