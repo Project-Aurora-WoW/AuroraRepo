@@ -47,14 +47,14 @@ namespace
         std::string nameEn;
     };
 
-    struct GossipText
+    struct MenuItem
     {
         std::string action;
         std::string textRu;
         std::string textEn;
     };
 
-    std::unordered_map<uint32, std::vector<GossipText>> sShopGossipCache;
+    std::unordered_map<uint32, std::vector<MenuItem>> sShopGossipCache;
     std::mutex sShopGossipMutex;
 
     bool IsRussianLocale(Player const* player)
@@ -70,12 +70,12 @@ namespace
         return action == "shop" ? ACTION_SHOW_CATALOGUE : ACTION_LEAVE;
     }
 
-    std::string const& Label(Player* player, GossipText const& item)
+    std::string const& Label(Player* player, MenuItem const& item)
     {
         return IsRussianLocale(player) ? item.textRu : item.textEn;
     }
 
-    std::vector<GossipText> DefaultItems()
+    std::vector<MenuItem> DefaultItems()
     {
         return {
             { "shop",  "Покажи товары.",   "Show me your wares." },
@@ -166,7 +166,7 @@ public:
         if (creature->IsVendor())
             player->GetSession()->SendListInventory(creature->GetGUID());
 
-        std::vector<GossipText> items;
+        std::vector<MenuItem> items;
         {
             std::lock_guard<std::mutex> guard(sShopGossipMutex);
             auto itr = sShopGossipCache.find(creature->GetEntry());
@@ -177,7 +177,7 @@ public:
         if (items.empty())
             items = DefaultItems();
 
-        for (GossipText const& item : items)
+        for (MenuItem const& item : items)
         {
             AddGossipItemFor(player, GOSSIP_ICON_MONEY_BAG, Label(player, item).c_str(),
                              GOSSIP_SENDER_MAIN, ActionFromString(item.action));

@@ -44,7 +44,7 @@ namespace
     // ------------------------------------------------------------------------
     // Per-NPC menu text cache, shared with the other campaign givers.
     // ------------------------------------------------------------------------
-    struct GossipText
+    struct MenuItem
     {
         std::string action;
         std::string textRu;
@@ -52,7 +52,7 @@ namespace
         uint8       icon;
     };
 
-    std::unordered_map<uint32, std::vector<GossipText>> sValdorCache;
+    std::unordered_map<uint32, std::vector<MenuItem>> sValdorCache;
     std::mutex sValdorMutex;
 
     bool IsRussianLocale(Player const* player)
@@ -71,14 +71,14 @@ namespace
         return ACTION_LEAVE;
     }
 
-    std::string const& Label(Player* player, GossipText const& item)
+    std::string const& Label(Player* player, MenuItem const& item)
     {
         return IsRussianLocale(player) ? item.textRu : item.textEn;
     }
 
     // Fallback wording used when `aurora_gossip_texts` has no row for Valdor,
     // so the NPC still shows a usable menu on a fresh database.
-    std::vector<GossipText> DefaultItems()
+    std::vector<MenuItem> DefaultItems()
     {
         return {
             { "chain", "Проводи меня в Ночь Падших.", "Send me into the Night of the Fallen.", 0 },
@@ -102,7 +102,7 @@ public:
         bool const onAlliance = player->GetQuestStatus(QUEST_ALLIANCE_ARRIVAL) != QUEST_STATUS_NONE;
         bool const onHorde    = player->GetQuestStatus(QUEST_HORDE_ARRIVAL) != QUEST_STATUS_NONE;
 
-        std::vector<GossipText> items;
+        std::vector<MenuItem> items;
         {
             std::lock_guard<std::mutex> guard(sValdorMutex);
             auto itr = sValdorCache.find(creature->GetEntry());
@@ -113,7 +113,7 @@ public:
         if (items.empty())
             items = DefaultItems();
 
-        for (GossipText const& item : items)
+        for (MenuItem const& item : items)
         {
             // The pointer to the gate is only offered while the player is on
             // one of the two arrival quests.
