@@ -1,7 +1,13 @@
 import struct, sys, os, shutil
 
-DBC_DIR = r"E:\b2\bin\RelWithDebInfo\data\dbc"
-OUT_DIR = r"C:\Users\Orel\Documents\MultiTool\HomeChats\Chat-3\dbc_patch"
+# Base DBCs are copied from the game client (or from an extracted map/dbc folder).
+# Override both paths without editing the file:
+#   python aurora_dbc_patch.py --dbc-dir "D:/wow/dbc" --out-dir ./build/dbc
+_DBC_DIR_DEFAULT = os.environ.get("AURORA_DBC_DIR", "")
+_OUT_DIR_DEFAULT = os.environ.get("AURORA_DBC_OUT", "")
+
+DBC_DIR = _DBC_DIR_DEFAULT
+OUT_DIR = _OUT_DIR_DEFAULT
 
 ACH = "Achievement.dbc"
 CRIT = "Achievement_Criteria.dbc"
@@ -129,7 +135,33 @@ CAMPAIGN_TITLES = [
 ]
 
 
+def parse_args():
+    import argparse
+
+    parser = argparse.ArgumentParser(
+        description="Build the Aurora DBC patch from a client/extracted dbc folder.")
+    parser.add_argument("--dbc-dir", default=DBC_DIR,
+                        help="folder with the base Achievement/CharTitles DBCs")
+    parser.add_argument("--out-dir", default=OUT_DIR,
+                        help="where the patched DBCs are written")
+    return parser.parse_args()
+
+
 def main():
+    global DBC_DIR, OUT_DIR
+
+    args = parse_args()
+    DBC_DIR = args.dbc_dir
+    OUT_DIR = args.out_dir
+
+    if not DBC_DIR or not os.path.isdir(DBC_DIR):
+        print("error: --dbc-dir is not a folder: %r" % DBC_DIR)
+        return 2
+
+    if not OUT_DIR:
+        print("error: --out-dir is required")
+        return 2
+
     os.makedirs(OUT_DIR, exist_ok=True)
 
     # ------------------------------------------------------------ Achievement
