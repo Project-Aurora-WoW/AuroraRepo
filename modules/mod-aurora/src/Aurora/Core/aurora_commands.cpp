@@ -142,6 +142,15 @@ namespace
             entry.nameRu     = fields[9].Get<std::string>();
             entry.nameEn     = fields[10].Get<std::string>();
 
+            // Hard cap so a runaway catalogue cannot flood the chat listing
+            // or the reload path with thousands of rows.
+            if (g_shopOrder.size() >= AURORA_MAX_SHOP_ENTRIES)
+            {
+                LOG_WARN("module", "[Aurora] Shop catalogue truncated at {} entries "
+                                   "(AURORA_MAX_SHOP_ENTRIES).", AURORA_MAX_SHOP_ENTRIES);
+                break;
+            }
+
             g_shopOrder.push_back(entry.id);
             g_shopById[entry.id] = entry;
         } while (result->NextRow());

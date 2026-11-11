@@ -549,6 +549,16 @@ private:
 
     void StartEvent(EventDefinition const& definition)
     {
+        // Ceiling on simultaneous events; without it a misconfigured
+        // schedule could start every row at once and lock the tick loop.
+        if (g_active.size() >= AURORA_MAX_ACTIVE_EVENTS)
+        {
+            LOG_WARN("module", "[Aurora] Event '{}' skipped: {} events are already "
+                               "running (AURORA_MAX_ACTIVE_EVENTS).",
+                     definition.internalName, g_active.size());
+            return;
+        }
+
         time_t const now = time(nullptr);
         time_t end = now + static_cast<time_t>(definition.durationHours) * 3600;
 

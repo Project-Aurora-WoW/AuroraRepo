@@ -31,7 +31,9 @@ using namespace Aurora;
 
 namespace
 {
-    constexpr uint32 SCORE_TICK_MS   = 3600000;  // 1 hour
+    // Ticks come from aurora_config.h so a rebuild is not needed to retune
+    // them; the expire tick runs once a day regardless of the retention.
+    constexpr uint32 SCORE_TICK_MS   = AURORA_SCORE_TICK_MS;
     constexpr uint32 EXPIRE_TICK_MS  = 86400000; // 24 hours
     constexpr uint32 WEEK_MS         = 604800000;
 
@@ -136,13 +138,14 @@ private:
     {
         std::string const period = PeriodForOffsetMonths(0);
         CharacterDatabase.Execute("CALL sp_AuroraRecalculateScores(3600)");
-        CharacterDatabase.Execute("CALL sp_AuroraRebuildCandidates('{}', 50)", period);
+        CharacterDatabase.Execute("CALL sp_AuroraRebuildCandidates('{}', {})",
+                                  period, AURORA_CANDIDATE_LIMIT);
         LOG_INFO("module", "[Aurora] Scores recalculated for period {}.", period);
     }
 
     void ExpireVotes()
     {
-        CharacterDatabase.Execute("CALL sp_AuroraExpireVotes(7)");
+        CharacterDatabase.Execute("CALL sp_AuroraExpireVotes({})", AURORA_VOTE_EXPIRE_DAYS);
     }
 
     // ------------------------------------------------------------------------
