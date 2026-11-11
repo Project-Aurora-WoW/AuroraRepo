@@ -136,15 +136,18 @@ VALUES
   (150200,'Управляющий магазином Авроры','Торговец',80,80,35,3,0,2000,7,0,7,1,1,1,1,'','npc_aurora_shopkeeper',1);
 
 -- models
-UPDATE `creature_template` SET `modelid1`=25000 WHERE `entry`=150001;
-UPDATE `creature_template` SET `modelid1`=25001 WHERE `entry`=150002;
-UPDATE `creature_template` SET `modelid1`=25010 WHERE `entry`=150010;
-UPDATE `creature_template` SET `modelid1`=25100 WHERE `entry`=150100;
-UPDATE `creature_template` SET `modelid1`=25101 WHERE `entry`=150101;
-UPDATE `creature_template` SET `modelid1`=25102 WHERE `entry`=150102;
-UPDATE `creature_template` SET `modelid1`=25020 WHERE `entry`=150020;
-UPDATE `creature_template` SET `modelid1`=25030 WHERE `entry`=150030;
-UPDATE `creature_template` SET `modelid1`=25103 WHERE `entry`=150200;
+-- AC master keeps models in creature_template_model, not in creature_template.modelid*.
+REPLACE INTO `creature_template_model` (`CreatureID`,`Idx`,`CreatureDisplayID`,`DisplayScale`,`Probability`,`VerifiedBuild`)
+VALUES
+  (150001,0,25000,1,1,NULL),
+  (150002,0,25001,1,1,NULL),
+  (150010,0,25010,1,1,NULL),
+  (150100,0,25100,1,1,NULL),
+  (150101,0,25101,1,1,NULL),
+  (150102,0,25102,1,1,NULL),
+  (150020,0,25020,1,1,NULL),
+  (150030,0,25030,1,1,NULL),
+  (150200,0,25103,1,1,NULL);
 
 -- gameobjects: type 10 = GO type button? AC 3.3.5a: type 10 = GAMEOBJECT_TYPE_GOOBER
 -- Altars are goober-type interactable objects with ScriptName hook.
