@@ -49,7 +49,7 @@ public:
     {
         LOG_INFO("module", " ");
         LOG_INFO("module", "+--------------------------------------------------+");
-        LOG_INFO("module", "|  PROJECT AURORA v{} - bootstrap                |", GetVersion());
+        LOG_INFO("module", "|  PROJECT AURORA - bootstrap                |");
         LOG_INFO("module", "|  Campaign #1: Night of the Fallen (map 950)      |");
         LOG_INFO("module", "+--------------------------------------------------+");
 

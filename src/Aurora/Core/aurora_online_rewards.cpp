@@ -1,4 +1,4 @@
-// ============================================================================
+﻿// ============================================================================
 // PROJECT AURORA v7.1.0
 // aurora_online_rewards.cpp - playtime rewards.
 //
@@ -23,6 +23,7 @@
 #include "DatabaseEnv.h"
 #include "Log.h"
 #include "Mail.h"
+#include "Item.h"
 #include "ObjectAccessor.h"
 #include "StringFormat.h"
 #include "DBCStores.h"
@@ -126,10 +127,16 @@ namespace
         {
             // Mail the item instead of dropping it in the bag: the player may
             // be at full capacity and must not lose a reward while offline.
+            CharacterDatabaseTransaction trans = CharacterDatabase.BeginTransaction();
             MailDraft draft(reward.subjectRu, reward.textRu);
-            draft.AddItem(reward.itemEntry, reward.itemAmount);
-            draft.SendMailTo(MailReceiver(player),
-                             MailSender(MAIL_NORMAL, 0, MAIL_STATIONERY_DEFAULT));
+            Item* item = Item::CreateItem(reward.itemEntry, reward.itemAmount);
+            if (item)
+            {
+                item->SaveToDB(trans);
+                draft.AddItem(item);
+            }
+            draft.SendMailTo(trans, MailReceiver(player), MailSender(MAIL_NORMAL, 0, MAIL_STATIONERY_DEFAULT));
+            CharacterDatabase.CommitTransaction(trans);
         }
 
         if (reward.auroraPoints > 0)

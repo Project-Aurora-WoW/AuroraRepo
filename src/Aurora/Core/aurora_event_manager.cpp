@@ -1,4 +1,4 @@
-// ============================================================================
+﻿// ============================================================================
 // PROJECT AURORA v7.1.0
 // aurora_event_manager.cpp - event scheduler.
 //
@@ -26,8 +26,10 @@
 #include "World.h"
 #include "DatabaseEnv.h"
 #include "Chat.h"
+#include "Language.h"
 #include "Log.h"
 #include "ObjectAccessor.h"
+#include "WorldState.h"
 
 #include "aurora_shared.h"
 
@@ -35,7 +37,10 @@ using namespace Aurora;
 
 namespace
 {
-    constexpr uint32 SCHEDULE_TICK_MS = 10000;   // scan the clock every 10 s
+    constexpr uint32 SCHEDULE_TICK_MS = 10000;
+    constexpr uint32 ACTIVITY_TICK_MS = 300000;  // 5 min server-activity rollup
+    constexpr uint32 ECLIPSE_MIN_ONLINE   = 300;
+    constexpr double ECLIPSE_MIN_ACTIVITY = 50000.0;
     constexpr uint32 ANNOUNCE_RETRY_MS = 600000; // do not spam the event banner
 
     struct EventDefinition
@@ -264,18 +269,47 @@ namespace
             ? "|cffFFD100[ЭВЕНТ]|r |cffffff00" + name + "|r начался! " + definition.descRu
             : "|cffFFD100[ЭВЕНТ]|r |cffffff00" + name + "|r завершился.";
 
-        sWorld->SendServerMessage(SERVER_MSG_STRING, message.c_str());
+        ChatHandler handler(nullptr);
+        handler.SendWorldText(message.c_str());
     }
-
     void SetWorldState(EventDefinition const& definition, uint32 value)
     {
         uint32 state = definition.worldStateId > 0
             ? definition.worldStateId
             : (30000 + definition.id);
 
-        sWorld->SetWorldState(state, value);
+        sWorldState->setWorldState(state, value);
     }
 }
+
+    // Participation credit: every player online during an active event gets
+    // one row in aurora_event_progress per active event instance.
+    void CreditParticipation()
+    {
+        for (auto const& pair : g_active)
+        {
+            uint32 const rowId = pair.second.rowId;
+            if (rowId == 0)
+                continue;
+
+            for (auto const& playerPair : ObjectAccessor::GetPlayers())
+            {
+                Player* player = playerPair.second;
+                if (!player || !player->IsInWorld())
+                    continue;
+
+                CharacterDatabase.Execute(
+                    "INSERT INTO `aurora_event_progress` "
+                    "(`active_event_id`, `player_guid`, `participation_sec`) "
+                    "VALUES ({}, {}, {}) "
+                    "ON DUPLICATE KEY UPDATE "
+                    "`participation_sec` = `participation_sec` + VALUES(`participation_sec`)",
+                    rowId, player->GetGUID().GetCounter(), SCHEDULE_TICK_MS / 1000);
+            }
+        }
+    }
+
+    void AuroraGrantEventRewards(uint32 activeEventId, uint32 eventId);
 
 class aurora_event_manager : public WorldScript, public PlayerScript
 {
@@ -302,13 +336,21 @@ public:
     void OnUpdate(uint32 diff) override
     {
         _timer += diff;
+        _activityTimer += diff;
+
+        // Daily server-activity rollup, independent from the schedule tick.
+        if (_activityTimer >= ACTIVITY_TICK_MS)
+        {
+            _activityTimer = 0;
+            UpdateServerActivity();
+        }
+
         if (_timer < SCHEDULE_TICK_MS)
             return;
 
         _timer = 0;
         Tick();
     }
-
     // ------------------------------------------------------------------------
     // Login: tell the player what is running, once per session
     // ------------------------------------------------------------------------
@@ -465,6 +507,10 @@ private:
             StartEvent(definition);
         }
 
+        // 4) credit participation time to everyone online during an active event
+        CreditParticipation();
+
+
         // 3) repeat the banner for long events that are still running
         for (auto const& pair : g_active)
         {
@@ -514,6 +560,9 @@ private:
         if (itr == g_definitions.end())
             return;
 
+        // Grant participation rewards before the progress rows are orphaned.
+        AuroraGrantEventRewards(activeItr->second.rowId, eventId);
+
         PersistStop(itr->second);
         SetWorldState(itr->second, 0);
         Announce(itr->second, false);
@@ -521,7 +570,47 @@ private:
         LOG_INFO("module", "[Aurora] Event '{}' ended.", itr->second.internalName);
     }
 
+    // ------------------------------------------------------------------------
+    // Daily server activity rollup.
+    //  peak_online   - highest simultaneous player count seen today
+    //  activity      - sum of every player total_score
+    //  eclipse       - dynamic event trigger, latched once per day
+    // Read by IsInScheduleWindow() for schedule_type = "activity".
+    // ------------------------------------------------------------------------
+    void UpdateServerActivity()
+    {
+        uint32 const online = static_cast<uint32>(ObjectAccessor::GetPlayers().size());
+
+        QueryResult scores = CharacterDatabase.Query(
+            "SELECT COALESCE(SUM(`total_score`), 0) FROM `aurora_player_activity`");
+
+        double total = 0.0;
+        if (scores)
+            total = scores->Fetch()[0].Get<double>();
+
+        CharacterDatabase.Execute(
+            "INSERT INTO `aurora_server_activity` "
+            "(`date`, `peak_online`, `total_activity_score`) VALUES (CURDATE(), {}, {}) "
+            "ON DUPLICATE KEY UPDATE "
+            "`peak_online` = GREATEST(`peak_online`, VALUES(`peak_online`)), "
+            "`total_activity_score` = VALUES(`total_activity_score`)",
+            online, total);
+
+        // Latch the eclipse trigger so the dynamic event fires once a day even
+        // if the threshold is crossed during several rollups.
+        if (online >= ECLIPSE_MIN_ONLINE && total >= ECLIPSE_MIN_ACTIVITY)
+        {
+            CharacterDatabase.Execute(
+                "UPDATE `aurora_server_activity` SET `eclipse_triggered` = 1, "
+                "`eclipse_time` = IFNULL(`eclipse_time`, NOW()) "
+                "WHERE `date` = CURDATE() AND `eclipse_triggered` = 0");
+        }
+
+        LOG_DEBUG("module", "[Aurora] Server activity: online={}, score={:.2f}.", online, total);
+    }
+
     uint32 _timer = 0;
+    uint32 _activityTimer = 0;
 };
 
 void AddSC_aurora_event_manager()

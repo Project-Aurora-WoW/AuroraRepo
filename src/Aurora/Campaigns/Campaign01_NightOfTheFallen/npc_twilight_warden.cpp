@@ -77,9 +77,9 @@ public:
         {
             Talk(SAY_AGGRO);
 
-            events.ScheduleEvent(EVENT_STRIKE, STRIKE_INTERVAL);
-            events.ScheduleEvent(EVENT_CURSE, CURSE_INTERVAL);
-            events.ScheduleEvent(EVENT_LEASH, LEASH_CHECK);
+            events.ScheduleEvent(EVENT_STRIKE, Milliseconds(STRIKE_INTERVAL));
+            events.ScheduleEvent(EVENT_CURSE, Milliseconds(CURSE_INTERVAL));
+            events.ScheduleEvent(EVENT_LEASH, Milliseconds(LEASH_CHECK));
         }
 
         void UpdateAI(uint32 diff) override
@@ -93,23 +93,23 @@ public:
                     case EVENT_STRIKE:
                         if (me->GetVictim())
                             DoCastVictim(SPELL_WARDEN_STRIKE);
-                        events.ScheduleEvent(EVENT_STRIKE, STRIKE_INTERVAL);
+                        events.ScheduleEvent(EVENT_STRIKE, Milliseconds(STRIKE_INTERVAL));
                         break;
 
                     case EVENT_CURSE:
                         if (Unit* target = SelectTarget(SelectTargetMethod::Random, 0, 0.0f, true))
                             DoCast(target, SPELL_WARDEN_CURSE);
-                        events.ScheduleEvent(EVENT_CURSE, CURSE_INTERVAL);
+                        events.ScheduleEvent(EVENT_CURSE, Milliseconds(CURSE_INTERVAL));
                         break;
 
                     case EVENT_LEASH:
                         if (IsBeyondLeash())
                         {
                             Talk(SAY_RESET);
-                            EnterEvadeMode(EvadeReason::Other);
+                            EnterEvadeMode(EVADE_REASON_OTHER);
                             break;
                         }
-                        events.ScheduleEvent(EVENT_LEASH, LEASH_CHECK);
+                        events.ScheduleEvent(EVENT_LEASH, Milliseconds(LEASH_CHECK));
                         break;
 
                     default:

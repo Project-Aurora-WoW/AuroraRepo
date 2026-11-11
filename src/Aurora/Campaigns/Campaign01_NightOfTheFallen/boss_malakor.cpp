@@ -80,7 +80,7 @@ public:
                 me->CastSpell(me, SPELL_DARK_SHIELD, true);
 
             events.Reset();
-            events.ScheduleEvent(EVENT_CHECK_SHIELD, SHIELD_CHECK_INTERVAL);
+            events.ScheduleEvent(EVENT_CHECK_SHIELD, Milliseconds(SHIELD_CHECK_INTERVAL));
 
             _summons.clear();
         }
@@ -102,23 +102,23 @@ public:
                 {
                     case EVENT_CHECK_SHIELD:
                         HandleShieldCheck();
-                        events.ScheduleEvent(EVENT_CHECK_SHIELD, SHIELD_CHECK_INTERVAL);
+                        events.ScheduleEvent(EVENT_CHECK_SHIELD, Milliseconds(SHIELD_CHECK_INTERVAL));
                         break;
 
                     case EVENT_SHADOW_BOLT:
                         if (Unit* target = SelectTarget(SelectTargetMethod::Random, 0, 0.0f, true))
                             DoCast(target, SPELL_SHADOW_BOLT_AURORA);
-                        events.ScheduleEvent(EVENT_SHADOW_BOLT, SHADOW_BOLT_INTERVAL);
+                        events.ScheduleEvent(EVENT_SHADOW_BOLT, Milliseconds(SHADOW_BOLT_INTERVAL));
                         break;
 
                     case EVENT_SUMMON_MINION:
                         SummonWave();
-                        events.ScheduleEvent(EVENT_SUMMON_MINION, SUMMON_MINION_INTERVAL);
+                        events.ScheduleEvent(EVENT_SUMMON_MINION, Milliseconds(SUMMON_MINION_INTERVAL));
                         break;
 
                     case EVENT_DARKNESS_AURA:
                         DoCast(me, SPELL_DARKNESS_AURA_AURORA, true);
-                        events.ScheduleEvent(EVENT_DARKNESS_AURA, DARKNESS_AURA_INTERVAL);
+                        events.ScheduleEvent(EVENT_DARKNESS_AURA, Milliseconds(DARKNESS_AURA_INTERVAL));
                         break;
 
                     default:
@@ -143,7 +143,7 @@ public:
         {
             DespawnMinions();
             _shieldBroken = false;
-            BossAI::EnterEvadeMode(EvadeReason::Other);
+            BossAI::EnterEvadeMode(EvadeReason::EVADE_REASON_OTHER);
         }
 
     private:
@@ -164,9 +164,9 @@ public:
 
             Talk(SAY_SHIELD_BROKEN);
 
-            events.ScheduleEvent(EVENT_SHADOW_BOLT, SHADOW_BOLT_INTERVAL);
-            events.ScheduleEvent(EVENT_SUMMON_MINION, SUMMON_MINION_INTERVAL);
-            events.ScheduleEvent(EVENT_DARKNESS_AURA, DARKNESS_AURA_INTERVAL);
+            events.ScheduleEvent(EVENT_SHADOW_BOLT, Milliseconds(SHADOW_BOLT_INTERVAL));
+            events.ScheduleEvent(EVENT_SUMMON_MINION, Milliseconds(SUMMON_MINION_INTERVAL));
+            events.ScheduleEvent(EVENT_DARKNESS_AURA, Milliseconds(DARKNESS_AURA_INTERVAL));
 
             if (!me->IsInCombat())
                 me->SetInCombatWithZone();

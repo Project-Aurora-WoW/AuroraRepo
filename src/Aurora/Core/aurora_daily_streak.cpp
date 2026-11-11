@@ -1,4 +1,4 @@
-// ============================================================================
+﻿// ============================================================================
 // PROJECT AURORA v7.1.0
 // aurora_daily_streak.cpp - consecutive-login streak.
 //
@@ -21,6 +21,7 @@
 #include "DatabaseEnv.h"
 #include "Log.h"
 #include "Mail.h"
+#include "Item.h"
 #include "StringFormat.h"
 #include "DBCStores.h"
 
@@ -126,11 +127,19 @@ namespace
     {
         if (reward.itemEntry > 0)
         {
-            MailDraft draft("Награда за серию входов",
-                            "Ваша серия входов продолжается. Так держать!");
-            draft.AddItem(reward.itemEntry, reward.itemAmount);
-            draft.SendMailTo(MailReceiver(player),
-                             MailSender(MAIL_NORMAL, 0, MAIL_STATIONERY_DEFAULT));
+            CharacterDatabaseTransaction transMail = CharacterDatabase.BeginTransaction();
+            MailDraft draft("Награда за серию входов", "Ваша серия входов продолжается. Так держать!");
+            if (reward.itemEntry > 0)
+            {
+                Item* item = Item::CreateItem(reward.itemEntry, reward.itemAmount);
+                if (item)
+                {
+                    item->SaveToDB(transMail);
+                    draft.AddItem(item);
+                }
+            }
+            draft.SendMailTo(transMail, MailReceiver(player), MailSender(MAIL_NORMAL, 0, MAIL_STATIONERY_DEFAULT));
+            CharacterDatabase.CommitTransaction(transMail);
         }
 
         if (reward.auroraPoints > 0)

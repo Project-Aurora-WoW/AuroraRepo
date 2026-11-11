@@ -1,9 +1,9 @@
-// ============================================================================
-// PROJECT AURORA v7.1.0
-// aurora_shop_purchases.sql is referenced from aurora_commands.cpp.
-// Schema fragment for the CHARACTER database - keep in sync with
-// sql/01_aurora_schema.sql (Section 2.7).
-// ============================================================================
+-- ============================================================================
+-- PROJECT AURORA v7.1.0
+-- aurora_shop_purchases.sql is referenced from aurora_commands.cpp.
+-- Schema fragment for the CHARACTER database - keep in sync with
+-- sql/01_aurora_schema.sql (Section 2.7).
+-- ============================================================================
 
 CREATE TABLE IF NOT EXISTS `aurora_shop_purchases` (
   `id`           INT UNSIGNED NOT NULL AUTO_INCREMENT,

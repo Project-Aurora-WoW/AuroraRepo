@@ -14,6 +14,7 @@
 #include "Player.h"
 #include "Creature.h"
 #include "Chat.h"
+#include "Language.h"
 #include "InstanceScript.h"
 
 #include "campaign01.h"
@@ -25,8 +26,8 @@ namespace
 {
     char const* TextFor(Player* player, char const* ru, char const* en)
     {
-        std::string locale = player->GetSession()->GetSessionDbcLocale();
-        bool const russian = (locale != "enUS" && locale != "enGB");
+        LocaleConstant const locale = player->GetSession()->GetSessionDbcLocale();
+        bool const russian = (locale == LOCALE_ruRU);
         return russian ? ru : en;
     }
 }
@@ -40,7 +41,7 @@ public:
     {
         explicit go_shadow_altarAI(GameObject* gameObject) : GameObjectAI(gameObject) { }
 
-        bool GossipHello(Player* player) override
+        bool GossipHello(Player* player, bool /*reportUse*/) override
         {
             if (me->GetMapId() != MAP_NIGHT_OF_THE_FALLEN)
                 return false;

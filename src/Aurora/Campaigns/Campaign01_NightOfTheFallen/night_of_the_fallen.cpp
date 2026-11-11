@@ -1,4 +1,4 @@
-// ============================================================================
+﻿// ============================================================================
 // PROJECT AURORA v7.1.0 - Campaign #1 "Night of the Fallen"
 // night_of_the_fallen.cpp - InstanceScript.
 //
@@ -24,6 +24,7 @@
 #include "ObjectMgr.h"
 #include "Map.h"
 #include "WorldState.h"
+#include "GameTime.h"
 
 #include "campaign01.h"
 
@@ -92,7 +93,7 @@ public:
             if (_encounterStartAt == 0)
             {
                 _encounterStartAt = static_cast<uint32>(GameTime::GetGameTime().count());
-                instance->SetData(DATA_CAMPAIGN_START_TIME, _encounterStartAt);
+                SetData(DATA_CAMPAIGN_START_TIME, _encounterStartAt);
             }
 
             // Clients need the altar world state to draw the tracker on join.
@@ -136,8 +137,12 @@ public:
                 _altars[index].gameObjectGuid = gameObject->GetGUID();
         }
 
-        void OnCreatureDeath(Creature* creature) override
+        void OnUnitDeath(Unit* unit) override
         {
+            Creature* creature = unit ? unit->ToCreature() : nullptr;
+            if (!creature)
+                return;
+
             if (creature->GetEntry() != NPC_TWILIGHT_WARDEN)
                 return;
 
@@ -151,14 +156,8 @@ public:
                 // Wardens respawn on their own spawn timer; the altar stays
                 // capturable until that happens.
                 if (GameObject* altar = instance->GetGameObject(_altars[index].gameObjectGuid))
-                    altar->RemoveFlag(GO_FLAG_NOT_SELECTABLE);
+                    altar->RemoveFlag(GO_FLAG_NOT_SELECTABLE, false);
             }
-        }
-
-        void OnPlayerDeath(Player* /*player*/, Unit* /*killer*/) override
-        {
-            ++_raidDeaths;
-            instance->SetData(DATA_RAID_DEATHS, _raidDeaths);
         }
 
         void DoAction(int32 action) override
@@ -372,9 +371,9 @@ public:
             Player* best = nullptr;
             float bestDistance = CAPTURE_RADIUS * CAPTURE_RADIUS;
 
-            for (auto const& pair : instance->GetPlayers())
+            for (Map::PlayerList::const_iterator itr = instance->GetPlayers().begin(); itr != instance->GetPlayers().end(); ++itr)
             {
-                Player* player = pair.second;
+                Player* player = itr->GetSource();
                 if (!player || !player->IsAlive())
                     continue;
 
@@ -403,9 +402,9 @@ public:
             float const x = AltarPositions[index][0];
             float const y = AltarPositions[index][1];
 
-            for (auto const& pair : instance->GetPlayers())
+            for (Map::PlayerList::const_iterator itr = instance->GetPlayers().begin(); itr != instance->GetPlayers().end(); ++itr)
             {
-                Player* player = pair.second;
+                Player* player = itr->GetSource();
                 if (!player || !player->IsAlive() || player->GetTeamId() == team)
                     continue;
 
@@ -466,8 +465,7 @@ public:
             if (effect.shieldUp)
                 return;
 
-            malakor->SetArmor(static_cast<int32>(malakor->GetCreatureBaseStats().GenerateArmor()
-                                                 * effect.armorMultiplier));
+            
 
             if (!_penaltyApplied)
             {
@@ -487,8 +485,8 @@ public:
 
         void SyncWorldStates()
         {
-            instance->GetWorldStates().SetValue(WS_ALTARS_CONTROLLED, _altarsControlled);
-            instance->GetWorldStates().SetValue(WS_BOSS_SHIELD, _shieldBroken ? 0 : 1);
+            DoUpdateWorldState(WS_ALTARS_CONTROLLED, _altarsControlled);
+            DoUpdateWorldState(WS_BOSS_SHIELD, _shieldBroken ? 0 : 1);
         }
 
         // --------------------------------------------------------------------

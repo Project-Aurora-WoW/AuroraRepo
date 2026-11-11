@@ -1,4 +1,4 @@
-// ============================================================================
+﻿// ============================================================================
 // PROJECT AURORA v7.1.0
 // aurora_activity_bridge.cpp - live activity counters.
 //
@@ -104,6 +104,11 @@ namespace
         strftime(buffer, sizeof(buffer), "%Y-%m-%d", &localTime);
         return std::string(buffer);
     }
+    std::string CurrentWeekStartSql()
+    {
+        return "'" + CurrentWeekStart() + "'";
+    }
+
 
     // ------------------------------------------------------------------------
     // Careful with unsigned subtraction: a counter that somehow went negative
@@ -162,6 +167,62 @@ public:
         CharacterDatabase.Execute(
             "INSERT IGNORE INTO `aurora_daily_streak` (`player_guid`, `last_login_date`) "
             "VALUES ({}, CURDATE())", guid);
+
+        ApplyPendingGrants(player);
+    }
+
+    // ------------------------------------------------------------------------
+    // Titles and visual enchants owed to the player.
+    // A mail can carry an item, but not a title id, so the vote settlement
+    // stores the grant in `aurora_pending_grants` and it is applied here,
+    // on the first login after settlement. Each row is marked applied so a
+    // title is never handed out twice.
+    // ------------------------------------------------------------------------
+    void ApplyPendingGrants(Player* player)
+    {
+        uint32 const guid = player->GetGUID().GetCounter();
+
+        QueryResult result = CharacterDatabase.Query(
+            "SELECT `id`, `title_dbc_id`, `visual_enchant_id` "
+            "FROM `aurora_pending_grants` "
+            "WHERE `player_guid` = {} AND `applied_at` IS NULL "
+            "ORDER BY `id` ASC", guid);
+
+        if (!result)
+            return;
+
+        do
+        {
+            Field* fields = result->Fetch();
+
+            uint32 rowId            = fields[0].Get<uint32>();
+            uint32 titleDbcId       = fields[1].Get<uint32>();
+            uint32 visualEnchantId  = fields[2].Get<uint32>();
+
+            if (titleDbcId > 0)
+            {
+                if (CharTitlesEntry const* title = sCharTitlesStore.LookupEntry(titleDbcId))
+                    player->SetTitle(title);
+                else
+                    LOG_WARN("module", "[Aurora] Pending grant {}: title {} is missing from "
+                                       "CharTitles.dbc - client patch applied?", rowId, titleDbcId);
+            }
+
+            if (visualEnchantId > 0)
+            {
+                CharacterDatabase.Execute(
+                    "INSERT INTO `aurora_player_enchants` "
+                    "(`player_guid`, `enchant_id`, `is_active`) VALUES ({}, {}, 0) "
+                    "ON DUPLICATE KEY UPDATE `enchant_id` = `enchant_id`",
+                    guid, visualEnchantId);
+            }
+
+            CharacterDatabase.Execute(
+                "UPDATE `aurora_pending_grants` SET `applied_at` = NOW() WHERE `id` = {}",
+                rowId);
+
+            LOG_INFO("module", "[Aurora] Applied pending grant {} to player {}.", rowId, guid);
+        } while (result->NextRow());
     }
 
     void OnPlayerLogout(Player* player) override
@@ -189,13 +250,6 @@ public:
         ++Pending(killer->GetGUID().GetCounter()).playersKilled;
     }
 
-    void OnPlayerDeath(Player* player, Unit* /*killer*/) override
-    {
-        if (!player)
-            return;
-
-        ++Pending(player->GetGUID().GetCounter()).deaths;
-    }
 
     void OnPlayerCompleteQuest(Player* player, Quest const* quest) override
     {
@@ -236,13 +290,6 @@ public:
         GrantAchievementReward(player, achievement->ID);
     }
 
-    void OnPlayerSendMail(Player* player, MailDraft& /*draft*/, ObjectGuid /*receiver*/) override
-    {
-        if (!player)
-            return;
-
-        ++Pending(player->GetGUID().GetCounter()).mailsSent;
-    }
 
     void OnPlayerStoreNewItem(Player* player, Item* /*item*/, uint32 /*count*/) override
     {
@@ -369,6 +416,38 @@ private:
             "`quests_completed` = `quests_completed` + VALUES(`quests_completed`)",
             guid, CurrentWeekStart(), pending.playtimeSeconds,
             pending.creaturesKilled, pending.playersKilled, pending.questsCompleted);
+
+        // Online-reward counters. Without this the thresholds in
+        // `aurora_online_rewards` can never be reached, because nothing else
+        // increments the minute counters.
+        // Period rollover: daily resets at midnight, weekly on Monday,
+        // monthly on the 1st. The reset stamps are compared with CURDATE()
+        // so a server that was offline for a week still resets correctly.
+        uint32 elapsedMinutes = pending.playtimeSeconds / 60;
+        if (elapsedMinutes == 0)
+            return;
+
+        CharacterDatabase.Execute(
+            "INSERT INTO `aurora_online_progress` "
+            "(`player_guid`, `session_minutes`, `daily_minutes`, `weekly_minutes`, "
+            " `monthly_minutes`, `reset_day`, `reset_week`, `reset_month`) "
+            "VALUES ({}, {}, {}, {}, {}, CURDATE(), " + CurrentWeekStartSql() + ", "
+            "DATE_FORMAT(CURDATE(), '%Y-%m-01')) "
+            "ON DUPLICATE KEY UPDATE "
+            "`session_minutes` = `session_minutes` + VALUES(`session_minutes`), "
+            "`daily_minutes`   = IF(`reset_day` = CURDATE(), "
+            "                       `daily_minutes` + VALUES(`daily_minutes`), "
+            "                       VALUES(`daily_minutes`)), "
+            "`weekly_minutes`  = IF(`reset_week` = " + CurrentWeekStartSql() + ", "
+            "                       `weekly_minutes` + VALUES(`weekly_minutes`), "
+            "                       VALUES(`weekly_minutes`)), "
+            "`monthly_minutes` = IF(`reset_month` = DATE_FORMAT(CURDATE(), '%Y-%m-01'), "
+            "                       `monthly_minutes` + VALUES(`monthly_minutes`), "
+            "                       VALUES(`monthly_minutes`)), "
+            "`reset_day`       = CURDATE(), "
+            "`reset_week`      = " + CurrentWeekStartSql() + ", "
+            "`reset_month`     = DATE_FORMAT(CURDATE(), '%Y-%m-01')",
+            guid, elapsedMinutes, elapsedMinutes, elapsedMinutes, elapsedMinutes);
     }
 
     // ------------------------------------------------------------------------
@@ -415,10 +494,11 @@ private:
         if (sendMail && !subject.empty())
         {
             MailDraft draft(subject, text);
-            draft.SendMailTo(MailReceiver(player), MailSender(MAIL_NORMAL, 0, MAIL_STATIONERY_DEFAULT), false, false);
+            CharacterDatabaseTransaction trans = CharacterDatabase.BeginTransaction();
+            draft.SendMailTo(trans, MailReceiver(player), MailSender(MAIL_NORMAL, 0, MAIL_STATIONERY_DEFAULT));
+            CharacterDatabase.CommitTransaction(trans);
         }
     }
-
     uint32 _flushTimer = 0;
 };
 

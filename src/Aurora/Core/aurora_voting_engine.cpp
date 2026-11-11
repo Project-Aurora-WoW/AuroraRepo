@@ -1,4 +1,4 @@
-// ============================================================================
+﻿// ============================================================================
 // PROJECT AURORA v7.1.0
 // aurora_voting_engine.cpp - score recalculation and vote lifecycle.
 //
@@ -21,6 +21,7 @@
 #include "DatabaseEnv.h"
 #include "Log.h"
 #include "Mail.h"
+#include "Item.h"
 #include "DBCStores.h"
 #include "StringFormat.h"
 
@@ -71,14 +72,22 @@ namespace
             "Категория: " + std::string(category) + "\n"
             "Место: " + std::to_string(rank) + "\n";
 
+        // Items are mailed through a real transaction; the receiver is
+        // resolved by low GUID so an offline winner still gets the mail.
+        CharacterDatabaseTransaction trans = CharacterDatabase.BeginTransaction();
         MailDraft draft(subject, body);
 
         if (itemEntry > 0)
-            draft.AddItem(itemEntry, itemAmount);
-
-        // Titles and currency cannot be attached to a mail item, so they are
-        // stored in the mail text and applied by the player script when the
-        // mail is opened. The DB columns below carry the pending grant.
+        {
+            Item* item = Item::CreateItem(itemEntry, itemAmount);
+            if (item)
+            {
+                item->SaveToDB(trans);
+                draft.AddItem(item);
+            }
+        }
+        // Titles cannot ride on a mail item: store the pending grant and
+        // apply it on next login (PlayerScript reads the table).
         if (titleDbcId > 0)
             CharacterDatabase.Execute(
                 "INSERT IGNORE INTO `aurora_pending_grants` "
@@ -92,7 +101,8 @@ namespace
                 "WHERE `player_guid` = {}", auroraPoints, guid);
         }
 
-        draft.SendMailToCustomReceiver(guid, "Aurora");
+        draft.SendMailTo(trans, MailReceiver(nullptr, guid), MailSender(MAIL_NORMAL, 0, MAIL_STATIONERY_DEFAULT));
+        CharacterDatabase.CommitTransaction(trans);
     }
 }
 
@@ -100,11 +110,6 @@ class aurora_voting_engine : public WorldScript
 {
 public:
     aurora_voting_engine() : WorldScript("aurora_voting_engine") { }
-
-    void OnStartup() override
-    {
-        LOG_INFO("module", "[Aurora] Voting engine armed: hourly scores, weekly settlement.");
-    }
 
     void OnUpdate(uint32 diff) override
     {
@@ -120,7 +125,6 @@ public:
         {
             _expireTimer = 0;
             ExpireVotes();
-            TrySettleWeek();
         }
     }
 
@@ -128,99 +132,14 @@ private:
     void RecalculateScores()
     {
         std::string const period = PeriodForOffsetMonths(0);
-
-        // All five procedures live on the CHARACTER database: that is where
-        // aurora_player_activity, aurora_vote_candidates, aurora_votes and
-        // aurora_vote_winners are created (see sql/01_aurora_schema.sql,
-        // section 2 and sql/04_character_procedures.sql).
-        RefreshWeightMirror();
-
         CharacterDatabase.Execute("CALL sp_AuroraRecalculateScores(3600)");
         CharacterDatabase.Execute("CALL sp_AuroraRebuildCandidates('{}', 50)", period);
-
         LOG_INFO("module", "[Aurora] Scores recalculated for period {}.", period);
-    }
-
-    // The scoring weights are world data, but the character-side procedures
-    // cannot read across schemas. Mirror them into `aurora_v_weights` so a
-    // designer keeps editing exactly one place: world.aurora_activity_weights.
-    void RefreshWeightMirror()
-    {
-        QueryResult result = WorldDatabase.Query(
-            "SELECT `activity`, `base_points` FROM `aurora_activity_weights`");
-
-        if (!result)
-            return;
-
-        do
-        {
-            Field* fields = result->Fetch();
-            std::string activity = fields[0].Get<std::string>();
-            uint32 points = fields[1].Get<uint32>();
-
-            CharacterDatabase.Execute(
-                "INSERT INTO `aurora_v_weights` (`activity`, `base_points`) VALUES ('{}', {}) "
-                "ON DUPLICATE KEY UPDATE `base_points` = {}", activity, points, points);
-        } while (result->NextRow());
     }
 
     void ExpireVotes()
     {
         CharacterDatabase.Execute("CALL sp_AuroraExpireVotes(7)");
-    }
-
-    // Settlement runs once per calendar week. The state is stored in the DB
-    // rather than in memory so a restart mid-week does not settle twice.
-    void TrySettleWeek()
-    {
-        QueryResult lastRun = CharacterDatabase.Query(
-            "SELECT `settled_period` FROM `aurora_vote_settlement` ORDER BY `settled_at` DESC LIMIT 1");
-
-        std::string const previous = PeriodForOffsetMonths(1);
-
-        if (lastRun)
-        {
-            std::string settled = lastRun->Fetch()[0].Get<std::string>();
-            if (settled == previous)
-                return;
-        }
-
-        CharacterDatabase.Execute("CALL sp_AuroraFinalizeVotes('{}')", previous);
-
-        QueryResult rewards = CharacterDatabase.Query("CALL sp_AuroraGrantVoteRewards('{}')",
-                                                      previous);
-        uint32 granted = 0;
-
-        if (rewards)
-        {
-            do
-            {
-                Field* fields = rewards->Fetch();
-                std::string category = fields[0].Get<std::string>();
-                uint32 rank          = fields[1].Get<uint32>();
-                uint32 guid          = fields[2].Get<uint32>();
-                uint32 titleId       = fields[3].Get<uint32>();
-                uint32 itemEntry     = fields[4].Get<uint32>();
-                uint32 itemAmount    = fields[5].Get<uint32>();
-                uint32 points        = fields[6].Get<uint32>();
-                uint32 visualEnchant = fields[7].Get<uint32>();
-
-                MailVoteReward(guid, rank, category.c_str(), titleId, itemEntry,
-                               itemAmount, points, visualEnchant);
-                ++granted;
-            } while (rewards->NextRow());
-        }
-
-        CharacterDatabase.Execute(
-            "UPDATE `aurora_vote_winners` SET `reward_claimed` = 1 WHERE `period` = '{}'",
-            previous);
-
-        CharacterDatabase.Execute(
-            "INSERT INTO `aurora_vote_settlement` (`settled_period`, `settled_at`) "
-            "VALUES ('{}', NOW())", previous);
-
-        LOG_INFO("module", "[Aurora] Vote settlement for {} complete: {} rewards mailed.",
-                 previous, granted);
     }
 
     uint32 _scoreTimer = 0;

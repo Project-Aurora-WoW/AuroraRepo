@@ -73,10 +73,10 @@ public:
             Talk(SAY_AGGRO);
             instance->SetBossState(Aurora::DATA_LADY_VESPERA, IN_PROGRESS);
 
-            events.ScheduleEvent(EVENT_BOLT, BOLT_INTERVAL);
-            events.ScheduleEvent(EVENT_HEAL_WARDEN, HEAL_INTERVAL);
-            events.ScheduleEvent(EVENT_WEB, WEB_INTERVAL);
-            events.ScheduleEvent(EVENT_CHECK_WARDENS, WARDEN_CHECK_INTERVAL);
+            events.ScheduleEvent(EVENT_BOLT, Milliseconds(BOLT_INTERVAL));
+            events.ScheduleEvent(EVENT_HEAL_WARDEN, Milliseconds(HEAL_INTERVAL));
+            events.ScheduleEvent(EVENT_WEB, Milliseconds(WEB_INTERVAL));
+            events.ScheduleEvent(EVENT_CHECK_WARDENS, Milliseconds(WARDEN_CHECK_INTERVAL));
         }
 
         void UpdateAI(uint32 diff) override
@@ -93,18 +93,18 @@ public:
                     case EVENT_BOLT:
                         if (Unit* target = SelectTarget(SelectTargetMethod::Random, 0, 0.0f, true))
                             DoCast(target, SPELL_VESPERA_BOLT);
-                        events.ScheduleEvent(EVENT_BOLT, BOLT_INTERVAL);
+                        events.ScheduleEvent(EVENT_BOLT, Milliseconds(BOLT_INTERVAL));
                         break;
 
                     case EVENT_HEAL_WARDEN:
                         HealWardens();
-                        events.ScheduleEvent(EVENT_HEAL_WARDEN, HEAL_INTERVAL);
+                        events.ScheduleEvent(EVENT_HEAL_WARDEN, Milliseconds(HEAL_INTERVAL));
                         break;
 
                     case EVENT_WEB:
                         if (Unit* target = SelectTarget(SelectTargetMethod::Random, 0, 0.0f, true))
                             DoCast(target, SPELL_VESPERA_WEB);
-                        events.ScheduleEvent(EVENT_WEB, WEB_INTERVAL);
+                        events.ScheduleEvent(EVENT_WEB, Milliseconds(WEB_INTERVAL));
                         break;
 
                     case EVENT_CHECK_WARDENS:
@@ -115,7 +115,7 @@ public:
                             events.CancelEvent(EVENT_HEAL_WARDEN);
                             break;
                         }
-                        events.ScheduleEvent(EVENT_CHECK_WARDENS, WARDEN_CHECK_INTERVAL);
+                        events.ScheduleEvent(EVENT_CHECK_WARDENS, Milliseconds(WARDEN_CHECK_INTERVAL));
                         break;
 
                     default:

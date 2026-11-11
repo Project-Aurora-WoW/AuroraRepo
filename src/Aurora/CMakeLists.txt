@@ -11,34 +11,45 @@
 # ============================================================================
 
 set(AURORA_CORE_SOURCES
-    ${CMAKE_CURRENT_SOURCE_DIR}/Core/aurora_shared.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/Core/aurora_bootstrap.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/Core/aurora_commands.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/Core/aurora_activity_bridge.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/aurora_script_loader.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/Core/aurora_shared.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/Core/aurora_bootstrap.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/Core/aurora_commands.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/Core/aurora_activity_bridge.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/Core/aurora_event_rewards.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/Core/aurora_visual_enchants.cpp
 )
 
 set(AURORA_CAMPAIGN01_SOURCES
-    ${CMAKE_CURRENT_SOURCE_DIR}/Campaigns/Campaign01_NightOfTheFallen/campaign01.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/Campaigns/Campaign01_NightOfTheFallen/night_of_the_fallen.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/Campaigns/Campaign01_NightOfTheFallen/boss_malakor.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/Campaigns/Campaign01_NightOfTheFallen/boss_vespera.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/Campaigns/Campaign01_NightOfTheFallen/npc_twilight_warden.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/Campaigns/Campaign01_NightOfTheFallen/go_shadow_altar.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/Campaigns/Campaign01_NightOfTheFallen/campaign01.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/Campaigns/Campaign01_NightOfTheFallen/night_of_the_fallen.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/Campaigns/Campaign01_NightOfTheFallen/boss_malakor.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/Campaigns/Campaign01_NightOfTheFallen/boss_vespera.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/Campaigns/Campaign01_NightOfTheFallen/npc_twilight_warden.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/Campaigns/Campaign01_NightOfTheFallen/go_shadow_altar.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/Campaigns/Campaign01_NightOfTheFallen/go_aurora_portal.cpp
 )
 
 set(AURORA_SOURCES ${AURORA_CORE_SOURCES} ${AURORA_CAMPAIGN01_SOURCES})
 
+target_include_directories(scripts PRIVATE
+    ${CMAKE_CURRENT_LIST_DIR}/Core
+    ${CMAKE_CURRENT_LIST_DIR}/Campaigns/Campaign01_NightOfTheFallen
+)
+target_sources(scripts PRIVATE ${AURORA_SOURCES})
+
 # Headers are listed for IDE navigation only.
 set(AURORA_HEADERS
-    ${CMAKE_CURRENT_SOURCE_DIR}/Core/aurora_config.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/Core/aurora_shared.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/Campaigns/Campaign01_NightOfTheFallen/campaign01.h
+    ${CMAKE_CURRENT_LIST_DIR}/Core/aurora_config.h
+    ${CMAKE_CURRENT_LIST_DIR}/Core/aurora_shared.h
+    ${CMAKE_CURRENT_LIST_DIR}/Campaigns/Campaign01_NightOfTheFallen/campaign01.h
 )
 
 # Export to the parent scope so scripts/CMakeLists.txt can do:
 #   include(${CMAKE_CURRENT_SOURCE_DIR}/Aurora/CMakeLists.txt)
 #   target_sources(scripts PRIVATE ${AURORA_SOURCES})
 set(AURORA_SOURCES ${AURORA_SOURCES} PARENT_SCOPE)
+
 
 message(STATUS "[AURORA] ${AURORA_SOURCES}")
 
