@@ -1,4 +1,4 @@
-# Aurora — /home/claude/workspace
+# Aurora — серверный модуль для AzerothCore (3.3.5a)
 
 [Продолжение работы над проектом «Аврора»](https://github.com/maxorlov59rus/aurora-wow)
 
@@ -14,15 +14,18 @@
 | `Core/aurora_config.h` | константы, диапазоны ID, тайминги |
 | `Core/aurora_shared.*` | enum'ы и ID-хелперы |
 | `Core/aurora_bootstrap.cpp` | проверка таблиц при старте, загрузка каталога магазина |
-| `Core/aurora_commands.cpp` | `.aurora shop / vote / activity / version / reload` |
-| `Core/aurora_activity_bridge.cpp` | счётчики активности, batched flush раз в минуту |
-| `Core/aurora_event_manager.cpp` | планировщик 8 эвентов (time / calendar / activity) |
+| `Core/aurora_commands.cpp` | `.aurora shop / vote / campaign / activity / version / reload` |
+| `Core/aurora_activity_bridge.cpp` | счётчики активности, batched flush раз в минуту, выдача отложенных наград |
+| `Core/aurora_event_manager.cpp` | планировщик эвентов (time / calendar / activity) |
+| `Core/aurora_event_rewards.cpp` | ярусы наград за эвенты, выдача онлайн и офлайн-игрокам |
 | `Core/aurora_online_rewards.cpp` | награды за онлайн по порогам |
 | `Core/aurora_daily_streak.cpp` | 7-дневная серия входов |
 | `Core/aurora_voting_engine.cpp` | пересчёт баллов и выплаты победителям |
-| `Campaigns/Campaign01_NightOfTheFallen/` | инстанс, боссы, алтари, Стражи |
+| `Core/aurora_visual_enchants.cpp` | визуальные энчанты: владение и применение |
+| `Core/aurora_lore.cpp` | хроники кампании, открываемые достижениями |
+| `Campaigns/Campaign01_NightOfTheFallen/` | инстанс, боссы, алтари, Стражи, достижения кампании |
 
-**`sql/`** — шесть файлов, применяются в порядке номеров
+**`sql/`** — девять файлов, применяются в порядке номеров
 
 | Файл | База |
 |---|---|
@@ -32,10 +35,17 @@
 | `04_character_procedures.sql` | **character** |
 | `05_character_extra_tables.sql` | character |
 | `06_aurora_shop_purchases.sql` | character |
+| `07_aurora_gossip_texts.sql` | world |
+| `08_aurora_rbac.sql` | world (RBAC-права для `.aurora shop buy` / `.aurora vote cast`) |
+| `09_aurora_pending_grants.sql` | character (отложенные награды: титулы, энчанты, предметы) |
 
 **`addon/AuroraUI/`** — готовый к установке клиентский аддон (без внешних зависимостей).
 
 **`addon/ElvUI_Aurora/`** — альтернативная версия на ElvUI (требует установленного ElvUI).
+
+**`tools/`** — сборщик патча DBC (`aurora_dbc_patch.py`) и упаковка MPQ.
+
+**`docs/`** — установка DBC-патча, публикация в GitHub.
 
 ## Статус
 
@@ -43,7 +53,7 @@
 
 ## Сборка
 
-См. [BUILD.md](BUILD.md).
+См. [BUILD.md](BUILD.md). Раскладка SQL по базам — [SQL_NOTES.md](SQL_NOTES.md).
 
 ## Лицензия
 
