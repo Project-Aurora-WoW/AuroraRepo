@@ -19,6 +19,7 @@ void AddSC_boss_vespera();
 void AddSC_npc_twilight_warden();
 void AddSC_go_shadow_altar();
 void AddSC_go_aurora_portal();
+void AddSC_npc_campaign01_questgivers();
 void AddSC_aurora_campaign01_achievements();
 
 void AddAuroraScripts()
@@ -40,6 +41,7 @@ void AddAuroraScripts()
     AddSC_npc_twilight_warden();
     AddSC_go_shadow_altar();
     AddSC_go_aurora_portal();
+    AddSC_npc_campaign01_questgivers();
     AddSC_aurora_campaign01_achievements();
 }
 
