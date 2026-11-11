@@ -142,8 +142,75 @@ private:
         CharacterDatabase.Execute("CALL sp_AuroraExpireVotes(7)");
     }
 
-    uint32 _scoreTimer = 0;
+    // ------------------------------------------------------------------------
+    // Weekly settlement.
+    //
+    // FinalizeVotes() runs the stored procedure that turns the closed period's
+    // `aurora_vote_winners` into rows, then this code pays every winner out of
+    // `aurora_vote_rewards`. The matrix lives in the world DB so a designer can
+    // retune a prize without touching C++.
+    // ------------------------------------------------------------------------
+    void WeekFinalize()
+    {
+        std::string const closed = PeriodForOffsetMonths(1);
+
+        CharacterDatabase.Execute("CALL sp_AuroraFinalizeVotes('{}')", closed);
+
+        QueryResult winners = CharacterDatabase.Query(
+            "SELECT `category`, `rank`, `player_guid` FROM `aurora_vote_winners` "
+            "WHERE `period` = '{}' AND `reward_claimed` = 0 ORDER BY `category`, `rank`",
+            closed);
+
+        if (!winners)
+        {
+            LOG_INFO("module", "[Aurora] No unclaimed winners for period {}.", closed);
+            return;
+        }
+
+        uint32 paid = 0;
+
+        do
+        {
+            Field* fields        = winners->Fetch();
+            std::string category = fields[0].Get<std::string>();
+            uint32 rank          = fields[1].Get<uint32>();
+            uint32 guid          = fields[2].Get<uint32>();
+
+            QueryResult reward = WorldDatabase.Query(
+                "SELECT `title_dbc_id`, `item_entry`, `item_amount`, "
+                "`aurora_points`, `visual_enchant_id` "
+                "FROM `aurora_vote_rewards` WHERE `category` = '{}' AND `rank` = {}",
+                category, rank);
+
+            if (reward)
+            {
+                Field* r = reward->Fetch();
+
+                MailVoteReward(guid, rank, category.c_str(),
+                               r[0].Get<uint32>(), r[1].Get<uint32>(),
+                               r[2].Get<uint32>(), r[3].Get<uint32>(),
+                               r[4].Get<uint32>());
+
+                ++paid;
+            }
+            else
+            {
+                LOG_WARN("module", "[Aurora] No reward row for {} rank {} "
+                                   "- winner {} paid nothing.", category, rank, guid);
+            }
+
+            CharacterDatabase.Execute(
+                "UPDATE `aurora_vote_winners` SET `reward_claimed` = 1 "
+                "WHERE `period` = '{}' AND `category` = '{}' AND `rank` = {}",
+                closed, category, rank);
+        } while (winners->NextRow());
+
+        LOG_INFO("module", "[Aurora] Vote settlement for {} paid {} winner(s).", closed, paid);
+    }
+
+    uint32 _scoreTimer  = 0;
     uint32 _expireTimer = 0;
+    uint32 _weekTimer   = 0;
 };
 
 void AddSC_aurora_voting_engine()
