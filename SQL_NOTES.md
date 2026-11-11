@@ -15,6 +15,26 @@
 | `data/sql/db-characters/2026_11_10_04.sql` | CHARACTER | Журнал покупок, расчёты голосов, счётчики кампании, активности. |
 | `data/sql/db-characters/2026_11_10_05.sql` | CHARACTER | Журнал покупок магазина (совместимость). |
 | `data/sql/db-characters/2026_11_10_08.sql` | CHARACTER | Отложенные награды: титулы, энчанты, предметы, очки. |
+| `data/sql/db-world/2026_11_10_08.sql` | WORLD | Кастомные спеллы кампании и маунтов в `spell_dbc`. |
+| `data/sql/db-world/2026_11_10_09.sql` | WORLD | Пул ежедневных поручений `aurora_daily_quest_pool`. |
+| `data/sql/db-world/2026_11_10_11.sql` | WORLD | Перенос кампании #1 на карту 951. |
+| `data/sql/db-characters/2026_11_10_09.sql` | CHARACTER | Состояние ежедневных поручений `aurora_daily_quests`. |
+| `data/sql/db-characters/2026_11_10_10.sql` | CHARACTER | Счётчики продаж магазина `aurora_shop_sales`. |
+
+## Правило разделения баз
+
+- **world** — контент и справочники: каталог магазина, эвенты, награды, спеллы,
+  квесты, спавны. World-таблица общая для всех рилмов и **не должна мутироваться
+  в рантайме**: код никогда не делает туда `UPDATE`/`INSERT` из игрового действия.
+- **character** — всё, что принадлежит игроку или конкретному запуску: прогресс,
+  счётчики, журналы, состояние поручений, продажи.
+- **Межбазовых внешних ключей не бывает.** Таблица в character, ссылающаяся на
+  world-таблицу (например `aurora_event_progress.active_event_id` →
+  `aurora_active_events`), держит только обычный `KEY`, а целостность
+  обеспечивает код.
+- Планировщик эвентов пишет `aurora_active_events` в **world**: это состояние
+  рилма, а не игрока.
+
 **Почему процедуры на character, а не на world.** Всё, что они читают и пишут
 (`aurora_player_activity`, `aurora_vote_candidates`, `aurora_votes`,
 `aurora_vote_winners`), создаётся в character-схеме. Ранее файл лежал на world,
