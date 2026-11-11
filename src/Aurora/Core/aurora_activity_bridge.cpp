@@ -183,7 +183,8 @@ public:
         uint32 const guid = player->GetGUID().GetCounter();
 
         QueryResult result = CharacterDatabase.Query(
-            "SELECT `id`, `title_dbc_id`, `visual_enchant_id` "
+            "SELECT `id`, `title_dbc_id`, `visual_enchant_id`, `item_entry`, "
+            "`item_amount`, `aurora_points` "
             "FROM `aurora_pending_grants` "
             "WHERE `player_guid` = {} AND `applied_at` IS NULL "
             "ORDER BY `id` ASC", guid);
@@ -198,6 +199,43 @@ public:
             uint32 rowId            = fields[0].Get<uint32>();
             uint32 titleDbcId       = fields[1].Get<uint32>();
             uint32 visualEnchantId  = fields[2].Get<uint32>();
+            uint32 itemEntry        = fields[3].Get<uint32>();
+            uint32 itemAmount       = fields[4].Get<uint32>();
+            uint32 auroraPoints     = fields[5].Get<uint32>();
+
+            // Items and currency go through a mail so a full inventory cannot
+            // swallow them: the player is already in world by now, but the
+            // mailbox is the only delivery that never fails.
+            if (itemEntry > 0 || auroraPoints > 0)
+            {
+                CharacterDatabaseTransaction trans = CharacterDatabase.BeginTransaction();
+
+                MailDraft draft("Награда Авроры", "Вам начислена отложенная награда Авроры.");
+
+                if (itemEntry > 0)
+                {
+                    Item* item = Item::CreateItem(itemEntry, itemAmount);
+                    if (item)
+                    {
+                        item->SaveToDB(trans);
+                        draft.AddItem(item);
+                    }
+                }
+
+                if (auroraPoints > 0)
+                {
+                    Item* points = Item::CreateItem(ITEM_AURORA_POINTS, auroraPoints);
+                    if (points)
+                    {
+                        points->SaveToDB(trans);
+                        draft.AddItem(points);
+                    }
+                }
+
+                draft.SendMailTo(trans, MailReceiver(player),
+                                 MailSender(MAIL_NORMAL, 0, MAIL_STATIONERY_DEFAULT));
+                CharacterDatabase.CommitTransaction(trans);
+            }
 
             if (titleDbcId > 0)
             {

@@ -492,6 +492,23 @@ private:
         for (uint32 eventId : toStop)
             StopEvent(eventId);
 
+        // 1b) a running event whose window closed (server was down at the end
+        // of its schedule, or the row was edited) must not run forever.
+        std::vector<uint32> toExpire;
+        for (auto const& pair : g_active)
+        {
+            auto itr = g_definitions.find(pair.first);
+            if (itr == g_definitions.end())
+                continue;
+
+            if (!IsInScheduleWindow(itr->second)
+                && pair.second.endsAt > now + static_cast<time_t>(itr->second.durationHours) * 3600)
+                toExpire.push_back(pair.first);
+        }
+
+        for (uint32 eventId : toExpire)
+            CancelEvent(eventId);
+
         // 2) start what should be running
         for (auto const& pair : g_definitions)
         {
@@ -546,6 +563,33 @@ private:
 
         LOG_INFO("module", "[Aurora] Event '{}' started, ends in {} h.",
                  definition.internalName, definition.durationHours);
+    }
+
+    // Same as StopEvent, but the instance is marked 'cancelled' instead of
+    // 'completed' because it never reached its scheduled end. Rewards are not
+    // granted: the event did not run its full duration.
+    void CancelEvent(uint32 eventId)
+    {
+        auto activeItr = g_active.find(eventId);
+        if (activeItr == g_active.end())
+            return;
+
+        ActiveEvent const active = activeItr->second;
+        g_active.erase(activeItr);
+
+        auto itr = g_definitions.find(eventId);
+        if (itr == g_definitions.end())
+            return;
+
+        WorldDatabase.Execute(
+            "UPDATE `aurora_active_events` SET `status` = 'cancelled' "
+            "WHERE `id` = {} AND `status` = 'active'", active.rowId);
+
+        SetWorldState(itr->second, 0);
+        Announce(itr->second, false);
+
+        LOG_INFO("module", "[Aurora] Event '{}' cancelled: its schedule window closed "
+                           "while the instance was still running.", itr->second.internalName);
     }
 
     void StopEvent(uint32 eventId)

@@ -428,7 +428,11 @@ VALUES
      'dynamic',1,'activity','online:300;activity:50000',0,0,30007,1),
   (8,'awakening_ancients','Пробуждение Древних','Awakening of the Ancients',
      'Древние пробуждаются в солнцестояние','The Ancients awaken at the solstice',
-     'seasonal',336,'calendar','SOLSTICE',0,0,30008,1);
+     'seasonal',336,'calendar','SOLSTICE',0,0,30008,1),
+  (9,'fall_of_altars','Падение Алтарей','Fall of the Altars',
+     'Тьма поглощает алтари Ночного города — верните их свету',
+     'Darkness swallows the altars of the Night City - return them to the light',
+     'weekly',5,'time','SUN:21:00',950,0,30009,1);
 
 REPLACE INTO `aurora_event_rewards`
   (`id`,`event_id`,`tier`,`requirement_type`,`requirement_value`,
@@ -438,7 +442,12 @@ VALUES
   (2,1,'bronze','kills',50,0,1,0,5,0,0,'5 осколков','5 Shards'),
   (3,1,'silver','quests',3,0,1,20,10,0,0,'20 Очков Авроры','20 Aurora Points'),
   (4,1,'gold','helps',5,60010,1,0,0,0,0,'Свиток Рассвета','Dawn Scroll'),
-  (5,1,'legendary','time',120,0,1,0,0,0,101,'Малое Сияние Авроры','Minor Aurora Glow');
+  (5,1,'legendary','time',120,0,1,0,0,0,101,'Малое Сияние Авроры','Minor Aurora Glow'),
+
+  (6,9,'participation','time',30,0,1,0,3,0,0,'Участие в защите алтарей','Altar defence participation'),
+  (7,9,'bronze','kills',25,0,1,0,8,0,0,'10 осколков','10 Shards'),
+  (8,9,'silver','bosses',1,0,1,30,15,0,0,'30 Очков Авроры','30 Aurora Points'),
+  (9,9,'gold','time',180,50030,1,50,25,0,0,'Сундук Алтаря','Altar Chest');
 
 -- ============================================================================
 -- 15. SHOP

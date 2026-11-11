@@ -33,7 +33,10 @@ local EVENTS = {
     [6] = "Ярмарка Равновесия",
     [7] = "Затмение",
     [8] = "Пробуждение Древних",
+    [9] = "Падение Алтарей",
 }
+
+local MAX_EVENT_ID = 9
 
 -- ============================================================================
 -- Вспомогательные функции
@@ -209,7 +212,7 @@ local evClose = CreateFrame("Button", nil, eventsFrame, "UIPanelCloseButton")
 evClose:SetPoint("TOPRIGHT", eventsFrame, "TOPRIGHT", -2, -2)
 
 eventsFrame.rows = {}
-for eventId = 1, 8 do
+for eventId = 1, MAX_EVENT_ID do
     local row = eventsFrame:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
     row:SetPoint("TOPLEFT", eventsFrame, "TOPLEFT", 20, -46 - (eventId - 1) * 26)
     row:SetJustifyH("LEFT")
@@ -219,7 +222,7 @@ end
 local function RefreshEvents()
     local anyActive = false
 
-    for eventId = 1, 8 do
+    for eventId = 1, MAX_EVENT_ID do
         local row = eventsFrame.rows[eventId]
         local state = GetWorldState(WS_EVENT_BASE + eventId)
         local name = EVENTS[eventId] or "?"

@@ -95,6 +95,9 @@ namespace
         uint32      costShards   = 0;
         uint32      costAurora   = 0;
         uint32      costGold     = 0;
+        uint32      discount     = 0;   // percent 0..90
+        uint32      maxPerPlayer = 0;   // 0 = unlimited
+        bool        isDaily      = false;
         std::string nameRu;
         std::string nameEn;
     };
@@ -110,7 +113,7 @@ namespace
 
         QueryResult result = WorldDatabase.Query(
             "SELECT `id`, `item_entry`, `item_amount`, `cost_shards`, `cost_aurora`, "
-            "`cost_gold`, `name_ru`, `name_en` "
+            "`cost_gold`, `discount`, `max_per_player`, `is_daily`, `name_ru`, `name_en` "
             "FROM `aurora_shop_items` WHERE `enabled` = 1 ORDER BY `id` ASC");
 
         if (!result)
@@ -131,8 +134,11 @@ namespace
             entry.costShards = fields[3].Get<uint32>();
             entry.costAurora = fields[4].Get<uint32>();
             entry.costGold   = fields[5].Get<uint32>();
-            entry.nameRu     = fields[6].Get<std::string>();
-            entry.nameEn     = fields[7].Get<std::string>();
+            entry.discount   = std::min<uint32>(fields[6].Get<uint32>(), 90);
+            entry.maxPerPlayer = fields[7].Get<uint32>();
+            entry.isDaily    = fields[8].Get<bool>();
+            entry.nameRu     = fields[9].Get<std::string>();
+            entry.nameEn     = fields[10].Get<std::string>();
 
             g_shopOrder.push_back(entry.id);
             g_shopById[entry.id] = entry;
@@ -146,6 +152,40 @@ namespace
     {
         if (!g_shopLoaded)
             LoadShopCatalogue();
+    }
+
+    // Price after the per-offer discount, kept in copper.
+    uint32 DiscountedShards(ShopEntry const& entry)
+    {
+        return entry.costShards - entry.costShards * entry.discount / 100;
+    }
+
+    uint32 DiscountedAurora(ShopEntry const& entry)
+    {
+        return entry.costAurora - entry.costAurora * entry.discount / 100;
+    }
+
+    uint32 DiscountedGold(ShopEntry const& entry)
+    {
+        return entry.costGold - entry.costGold * entry.discount / 100;
+    }
+
+    // How many units the player already bought in the current limit window.
+    uint32 PurchasesWithinLimit(Player* player, ShopEntry const& entry)
+    {
+        uint32 const guid = player->GetGUID().GetCounter();
+
+        std::string const query = entry.isDaily
+            ? "SELECT COUNT(*) FROM `aurora_shop_purchases` "
+              "WHERE `player_guid` = {} AND `shop_id` = {} AND `purchased_at` >= CURDATE()"
+            : "SELECT COUNT(*) FROM `aurora_shop_purchases` "
+              "WHERE `player_guid` = {} AND `shop_id` = {}";
+
+        QueryResult result = CharacterDatabase.Query(query, guid, entry.id);
+        if (!result)
+            return 0;
+
+        return result->Fetch()[0].Get<uint32>();
     }
 
     // ------------------------------------------------------------------------
@@ -198,6 +238,52 @@ namespace
     }
 
     // ------------------------------------------------------------------------
+    // Shop purchase helpers
+    // ------------------------------------------------------------------------
+    void Refund(Player* player, ShopEntry const& entry, uint32 shards, uint32 aurora, uint32 gold)
+    {
+        if (shards > 0)
+            player->AddItem(ITEM_SHARD_OF_FALLEN_STAR, shards);
+
+        if (aurora > 0)
+            player->AddItem(ITEM_AURORA_POINTS, aurora);
+
+        if (gold > 0)
+            player->ModifyMoney(static_cast<int32>(gold));
+    }
+
+    // Bags were full: the goods travel by mail. Paid currency stays spent.
+    void MailPurchase(Player* player, ShopEntry const& entry)
+    {
+        CharacterDatabaseTransaction trans = CharacterDatabase.BeginTransaction();
+
+        MailDraft draft("Покупка в магазине Авроры",
+                        "Товар был доставлен по почте, потому что в сумках не нашлось места.");
+
+        if (Item* item = Item::CreateItem(entry.itemEntry, entry.itemAmount))
+        {
+            item->SaveToDB(trans);
+            draft.AddItem(item);
+        }
+
+        draft.SendMailTo(trans, MailReceiver(player),
+                         MailSender(MAIL_NORMAL, 0, MAIL_STATIONERY_DEFAULT));
+        CharacterDatabase.CommitTransaction(trans);
+    }
+
+    void RecordPurchase(Player* player, ShopEntry const& entry)
+    {
+        CharacterDatabase.Execute(
+            "INSERT INTO `aurora_shop_purchases` "
+            "(`player_guid`, `shop_id`, `item_entry`, `amount`) VALUES ({}, {}, {}, {})",
+            player->GetGUID().GetCounter(), entry.id, entry.itemEntry, entry.itemAmount);
+
+        WorldDatabase.Execute(
+            "UPDATE `aurora_shop_items` SET `sold_count` = `sold_count` + 1 WHERE `id` = {}",
+            entry.id);
+    }
+
+    // ------------------------------------------------------------------------
     // .aurora shop buy <id>
     // ------------------------------------------------------------------------
     bool TryPurchase(Player* player, uint32 shopId)
@@ -216,21 +302,47 @@ namespace
         ShopEntry const& entry = itr->second;
         uint32 const guid = player->GetGUID().GetCounter();
 
-        if (entry.costShards > 0 && player->GetItemCount(ITEM_SHARD_OF_FALLEN_STAR, true) < entry.costShards)
+        if (entry.itemEntry == 0 || entry.itemAmount == 0)
+        {
+            handler.PSendSysMessage("|cffff0000[Aurora]|r %s",
+                Tr(player, "Товар настроен неверно. Сообщите администрации.",
+                           "This offer is misconfigured. Please contact an administrator."));
+            LOG_ERROR("module", "[Aurora] Shop offer {} points at item {} x{}.",
+                      entry.id, entry.itemEntry, entry.itemAmount);
+            return true;
+        }
+
+        // Per-player cap. `max_per_player` is rows per window: `is_daily` resets
+        // the counter at midnight, otherwise the cap is lifetime.
+        if (entry.maxPerPlayer > 0 && PurchasesWithinLimit(player, entry) >= entry.maxPerPlayer)
+        {
+            handler.PSendSysMessage("|cffff0000[Aurora]|r %s",
+                Tr(player, entry.isDaily ? "Лимит покупок на сегодня исчерпан."
+                                         : "Лимит покупок для вас исчерпан.",
+                           entry.isDaily ? "Daily purchase limit reached."
+                                         : "Your purchase limit is reached."));
+            return true;
+        }
+
+        uint32 const priceShards = DiscountedShards(entry);
+        uint32 const priceAurora = DiscountedAurora(entry);
+        uint32 const priceGold   = DiscountedGold(entry);
+
+        if (priceShards > 0 && player->GetItemCount(ITEM_SHARD_OF_FALLEN_STAR, true) < priceShards)
         {
             handler.PSendSysMessage("|cffff0000[Aurora]|r %s",
                 Tr(player, "Недостаточно осколков.", "Not enough shards."));
             return true;
         }
 
-        if (entry.costAurora > 0 && player->GetItemCount(ITEM_AURORA_POINTS, true) < entry.costAurora)
+        if (priceAurora > 0 && player->GetItemCount(ITEM_AURORA_POINTS, true) < priceAurora)
         {
             handler.PSendSysMessage("|cffff0000[Aurora]|r %s",
                 Tr(player, "Недостаточно очков Авроры.", "Not enough Aurora points."));
             return true;
         }
 
-        if (entry.costGold > 0 && player->GetMoney() < entry.costGold)
+        if (priceGold > 0 && player->GetMoney() < priceGold)
         {
             handler.PSendSysMessage("|cffff0000[Aurora]|r %s",
                 Tr(player, "Недостаточно золота.", "Not enough gold."));
@@ -239,25 +351,38 @@ namespace
 
         // Charge first, then deliver. If delivery fails the currency is
         // refunded, so the player never pays for nothing.
-        if (entry.costShards > 0)
-            player->DestroyItemCount(ITEM_SHARD_OF_FALLEN_STAR, entry.costShards, true);
+        if (priceShards > 0)
+            player->DestroyItemCount(ITEM_SHARD_OF_FALLEN_STAR, priceShards, true);
 
-        if (entry.costAurora > 0)
-            player->DestroyItemCount(ITEM_AURORA_POINTS, entry.costAurora, true);
+        if (priceAurora > 0)
+            player->DestroyItemCount(ITEM_AURORA_POINTS, priceAurora, true);
 
-        if (entry.costGold > 0)
-            player->ModifyMoney(-static_cast<int32>(entry.costGold));
+        if (priceGold > 0)
+            player->ModifyMoney(-static_cast<int32>(priceGold));
 
-        player->AddItem(entry.itemEntry, entry.itemAmount);
+        ItemPosCountVec dest;
+        InventoryResult const msg =
+            player->CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, entry.itemEntry, entry.itemAmount);
 
-        CharacterDatabase.Execute(
-            "INSERT INTO `aurora_shop_purchases` "
-            "(`player_guid`, `shop_id`, `item_entry`, `amount`) VALUES ({}, {}, {}, {})",
-            guid, entry.id, entry.itemEntry, entry.itemAmount);
+        if (msg != EQUIP_ERR_OK)
+        {
+            // Bags are full: hand the payment back and mail the goods instead
+            // of destroying the item the player has just paid for.
+            Refund(player, entry, priceShards, priceAurora, priceGold);
 
-        WorldDatabase.Execute(
-            "UPDATE `aurora_shop_items` SET `sold_count` = `sold_count` + 1 WHERE `id` = {}",
-            entry.id);
+            handler.PSendSysMessage("|cffff0000[Aurora]|r %s",
+                Tr(player, "Нет места в сумках. Товар отправлен по почте.",
+                           "Your bags are full. The item has been mailed to you."));
+
+            MailPurchase(player, entry);
+            RecordPurchase(player, entry);
+            return true;
+        }
+
+        if (Item* item = player->StoreNewItem(dest, entry.itemEntry, true))
+            player->SendNewItem(item, entry.itemAmount, true, false);
+
+        RecordPurchase(player, entry);
 
         handler.PSendSysMessage("|cff00ff00[Aurora]|r %s",
             Tr(player, "Покупка совершена.", "Purchase complete."));
@@ -530,16 +655,45 @@ namespace
                 if (player->GetQuestRewardStatus(q))
                     ++done;
 
-            handler.PSendSysMessage("%s: %u/%u", chain.label, done, total);
+            handler.PSendSysMessage("%s: {}/{}", chain.label, done, total);
         }
 
         QueryResult captured = CharacterDatabase.Query(
-            "SELECT `value` FROM `aurora_campaign_counters` "
+            "SELECT COALESCE(SUM(`value`), 0) FROM `aurora_campaign_counters` "
             "WHERE `player_guid` = {} AND `counter` = 'altar_captures'", guid);
 
         uint32 const total = captured ? captured->Fetch()[0].Get<uint32>() : 0;
         handler.PSendSysMessage("%s: %u",
             ru ? "Захвачено алтарей всего" : "Altars captured total", total);
+
+        // Streak: day N of the 7-day cycle and the best chain ever reached.
+        QueryResult streak = CharacterDatabase.Query(
+            "SELECT `current_streak`, `max_streak`, `last_login_date` "
+            "FROM `aurora_daily_streak` WHERE `player_guid` = {}", guid);
+
+        if (streak)
+        {
+            Field* sf = streak->Fetch();
+            handler.PSendSysMessage("%s: %u/%u %s(%s %u)",
+                ru ? "Серия входов" : "Login streak",
+                sf[0].Get<uint32>(), 7u,
+                ru ? "лучшая:" : "best:",
+                "", sf[1].Get<uint32>());
+        }
+
+        // Online-reward counters are what the thresholds in
+        // `aurora_online_rewards` are compared against.
+        QueryResult online = CharacterDatabase.Query(
+            "SELECT `daily_minutes`, `weekly_minutes`, `monthly_minutes` "
+            "FROM `aurora_online_progress` WHERE `player_guid` = {}", guid);
+
+        if (online)
+        {
+            Field* of = online->Fetch();
+            handler.PSendSysMessage("%s: %u / %u / %u",
+                ru ? "Минуты онлайн (день/нед/мес)" : "Online minutes (day/wk/month)",
+                of[0].Get<uint32>(), of[1].Get<uint32>(), of[2].Get<uint32>());
+        }
 
         QueryResult progress = CharacterDatabase.Query(
             "SELECT `completed_at`, `no_death` FROM `aurora_player_progress` "
