@@ -114,7 +114,6 @@ CRITERIA = [
 # Titles: id, ru male, ru female, en male, en female, achievement
 # Ids 5001..5016 mirror `aurora_titles.title_dbc_id` in sql/02_aurora_world_data.sql.
 CAMPAIGN_TITLES = [
-    (180, "Герой Ночи Падших", "Героиня Ночи Падших", "Hero of the Fallen Night", "Heroine of the Fallen Night", 10099),
 
     (5001, "Неустрашимый", "Неустрашимая", "the Fearless", "the Fearless", 10004),
     (5002, "Быстрее Тени", "Быстрее Тени", "Faster than Shadow", "Faster than Shadow", 10013),
