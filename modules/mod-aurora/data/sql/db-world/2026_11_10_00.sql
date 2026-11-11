@@ -111,7 +111,6 @@ CREATE TABLE IF NOT EXISTS `aurora_shop_items` (
   `description_en` TEXT,
   `is_daily`     TINYINT UNSIGNED NOT NULL DEFAULT 0,
   `discount`     TINYINT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'percent 0..90',
-  `sold_count`   INT UNSIGNED NOT NULL DEFAULT 0,
   `max_per_player` INT UNSIGNED NOT NULL DEFAULT 0 COMMENT '0 = unlimited',
   `enabled`      TINYINT UNSIGNED NOT NULL DEFAULT 1,
   PRIMARY KEY (`id`),

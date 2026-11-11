@@ -292,13 +292,16 @@ namespace
 
     void RecordPurchase(Player* player, ShopEntry const& entry)
     {
+        // Both writes go to the character DB: the world catalogue is content and
+        // must not be mutated at runtime (it is shared by every realm).
         CharacterDatabase.Execute(
             "INSERT INTO `aurora_shop_purchases` "
             "(`player_guid`, `shop_id`, `item_entry`, `amount`) VALUES ({}, {}, {}, {})",
             player->GetGUID().GetCounter(), entry.id, entry.itemEntry, entry.itemAmount);
 
-        WorldDatabase.Execute(
-            "UPDATE `aurora_shop_items` SET `sold_count` = `sold_count` + 1 WHERE `id` = {}",
+        CharacterDatabase.Execute(
+            "INSERT INTO `aurora_shop_sales` (`shop_id`, `sold_on`) VALUES ({}, CURDATE()) "
+            "ON DUPLICATE KEY UPDATE `sold_count` = `sold_count` + 1",
             entry.id);
     }
 
