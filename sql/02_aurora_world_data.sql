@@ -135,6 +135,24 @@ VALUES
   (150030,'Теневой прислужник','',80,80,14,0,0,2000,1,0,7,5,10,1,1,'','npc_shadow_minion',1),
   (150200,'Управляющий магазином Авроры','Торговец',80,80,35,3,0,2000,7,0,7,1,1,1,1,'','npc_aurora_shopkeeper',1);
 
+-- ----------------------------------------------------------------------------
+-- NPC GREETINGS AND GOSSIP (project range 7000+)
+-- Scripts npc_lyondrel/wargok/eonis_questgiver read gossip_menu_id from
+-- creature_template and the text from npc_text.
+-- ----------------------------------------------------------------------------
+REPLACE INTO `npc_text` (`ID`,`text0_0`,`lang0`,`Probability0`)
+VALUES
+  (7001,'Командир Лайондрел смотрит на юг, где небо темнеет раньше срока.',1,1),
+  (7002,'Варгок Кровавый Клык сплёвывает на песок: ночь придёт, и мы её встретим.',1,1),
+  (7003,'Странник Эонис молчит, глядя на весы в руке. Тьма и свет равны лишь в начале.',1,1),
+  (7004,'Управляющий магазином Авроры перебирает осколки. Цены проверяет сервер.',1,1);
+
+UPDATE `creature_template` SET `gossip_menu_id`=7001 WHERE `entry`=150100;
+UPDATE `creature_template` SET `gossip_menu_id`=7002 WHERE `entry`=150101;
+UPDATE `creature_template` SET `gossip_menu_id`=7003 WHERE `entry`=150102;
+UPDATE `creature_template` SET `gossip_menu_id`=7004 WHERE `entry`=150200;
+UPDATE `creature_template` SET `gossip_menu_id`=7004 WHERE `entry`=150010;
+
 -- models
 -- AC master keeps models in creature_template_model, not in creature_template.modelid*.
 REPLACE INTO `creature_template_model` (`CreatureID`,`Idx`,`CreatureDisplayID`,`DisplayScale`,`Probability`,`VerifiedBuild`)
