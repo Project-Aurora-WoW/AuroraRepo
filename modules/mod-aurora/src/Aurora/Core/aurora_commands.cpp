@@ -193,8 +193,16 @@ namespace
     // ------------------------------------------------------------------------
     bool ShowShopList(Player* player)
     {
-        EnsureShopLoaded();
         ChatHandler handler(player->GetSession());
+
+        if (!IsShopEnabled())
+        {
+            handler.PSendSysMessage("|cffff0000[Aurora]|r %s",
+                Tr(player, "Магазин отключён.", "The shop is disabled."));
+            return true;
+        }
+
+        EnsureShopLoaded();
 
         if (g_shopOrder.empty())
         {
@@ -288,8 +296,16 @@ namespace
     // ------------------------------------------------------------------------
     bool TryPurchase(Player* player, uint32 shopId)
     {
-        EnsureShopLoaded();
         ChatHandler handler(player->GetSession());
+
+        if (!IsShopEnabled())
+        {
+            handler.PSendSysMessage("|cffff0000[Aurora]|r %s",
+                Tr(player, "Магазин отключён.", "The shop is disabled."));
+            return true;
+        }
+
+        EnsureShopLoaded();
 
         auto itr = g_shopById.find(shopId);
         if (itr == g_shopById.end())
@@ -449,8 +465,16 @@ namespace
     // ------------------------------------------------------------------------
     bool ShowVoteList(Player* player)
     {
-        std::string const period = CurrentPeriod();
         ChatHandler handler(player->GetSession());
+
+        if (!IsVotingEnabled())
+        {
+            handler.PSendSysMessage("|cffff0000[Aurora]|r %s",
+                Tr(player, "Голосование отключено.", "Voting is disabled."));
+            return true;
+        }
+
+        std::string const period = CurrentPeriod();
 
         handler.PSendSysMessage("|cffFFD100=== %s %s ===|r",
             Tr(player, "КАНДИДАТЫ", "CANDIDATES"), period.c_str());
@@ -502,6 +526,13 @@ namespace
     bool ShowVoteTop(Player* player)
     {
         ChatHandler handler(player->GetSession());
+
+        if (!IsVotingEnabled())
+        {
+            handler.PSendSysMessage("|cffff0000[Aurora]|r %s",
+                Tr(player, "Голосование отключено.", "Voting is disabled."));
+            return true;
+        }
 
         QueryResult result = CharacterDatabase.Query(
             "SELECT w.`period`, w.`category`, w.`rank`, w.`votes_count`, ch.`name` "
@@ -757,9 +788,13 @@ public:
             { "version",  HandleVersionCommand,  rbac::RBAC_PERM_COMMAND_HELP, Console::Yes },
         };
 
+        // Short aliases promised by the help output: `.shop ...` behaves like
+        // `.aurora shop ...`, `.vote ...` like `.aurora vote ...`.
         static ChatCommandTable commandTable =
         {
             { "aurora", auroraCommands },
+            { "shop",   shopCommands },
+            { "vote",   voteCommands },
         };
 
         return commandTable;

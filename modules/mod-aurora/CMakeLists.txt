@@ -27,6 +27,7 @@ set(AURORA_CORE_SOURCES
     ${AURORA_ROOT_DIR}/src/Aurora/Core/aurora_voting_engine.cpp
     ${AURORA_ROOT_DIR}/src/Aurora/Core/aurora_visual_enchants.cpp
     ${AURORA_ROOT_DIR}/src/Aurora/Core/aurora_lore.cpp
+    ${AURORA_ROOT_DIR}/src/Aurora/Core/aurora_settings.cpp
 )
 
 set(AURORA_CAMPAIGN01_DIR ${AURORA_ROOT_DIR}/src/Aurora/Campaigns/Campaign01_NightOfTheFallen)
@@ -41,6 +42,7 @@ set(AURORA_CAMPAIGN01_SOURCES
     ${AURORA_CAMPAIGN01_DIR}/npc_campaign01_questgivers.cpp
     ${AURORA_CAMPAIGN01_DIR}/go_aurora_portal.cpp
     ${AURORA_CAMPAIGN01_DIR}/aurora_campaign01_achievements.cpp
+    ${AURORA_CAMPAIGN01_DIR}/aurora_campaign01_progress.cpp
 )
 
 set(AURORA_SOURCES ${AURORA_CORE_SOURCES} ${AURORA_CAMPAIGN01_SOURCES})

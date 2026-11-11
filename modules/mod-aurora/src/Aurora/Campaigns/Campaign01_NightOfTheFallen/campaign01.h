@@ -74,6 +74,14 @@ namespace Campaign01
     bool  IsAltarEntry(uint32 entry);
     int8  GetAltarIndexByPosition(float x, float y);
     char const* GetAltarStateName(AltarState state);
+
+    // ------------------------------------------------------------------------
+    // Run statistics, implemented in aurora_campaign01_progress.cpp.
+    // Declared here so the instance script does not include Player.h.
+    // ------------------------------------------------------------------------
+    void AuroraRecordAltarCapture(Player* player, InstanceScript* instance);
+    void AuroraRecordRaidDeath(InstanceScript* instance);
+    void AuroraPushWorldStates(InstanceScript* instance, uint32 altarsControlled, bool shieldBroken);
 }
 }
 

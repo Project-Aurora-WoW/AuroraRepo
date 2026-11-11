@@ -50,11 +50,20 @@ public:
 
     void OnStartup() override
     {
+        LoadSettings();
+
         LOG_INFO("module", " ");
         LOG_INFO("module", "+--------------------------------------------------+");
         LOG_INFO("module", "|  PROJECT AURORA - bootstrap                |");
         LOG_INFO("module", "|  Campaign #1: Night of the Fallen (map 950)      |");
         LOG_INFO("module", "+--------------------------------------------------+");
+
+        if (!IsProjectEnabled())
+        {
+            LOG_INFO("module", "[Aurora] Disabled by configuration (Aurora.Enable = 0). "
+                               "Tables are not touched.");
+            return;
+        }
 
         bool ok = true;
 

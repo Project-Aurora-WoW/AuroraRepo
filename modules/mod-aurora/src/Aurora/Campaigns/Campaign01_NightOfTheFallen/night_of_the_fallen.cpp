@@ -139,6 +139,9 @@ public:
 
         void OnUnitDeath(Unit* unit) override
         {
+            if (unit && unit->ToPlayer())
+                ++_raidDeaths;
+
             Creature* creature = unit ? unit->ToCreature() : nullptr;
             if (!creature)
                 return;
@@ -350,6 +353,7 @@ public:
 
             RecalculateControl();
             SyncWorldStates();
+            RecordCapture(contender);
 
             if (GameObject* altarObject = instance->GetGameObject(altar.gameObjectGuid))
             {
@@ -483,10 +487,25 @@ public:
                 malakor->CastSpell(malakor, SPELL_VULNERABLE, true);
         }
 
+        // Single path for the tracker world states: the helper in
+        // aurora_campaign01_progress.cpp does the actual DoUpdateWorldState
+        // calls, so there is no second, divergent implementation here.
         void SyncWorldStates()
         {
-            DoUpdateWorldState(WS_ALTARS_CONTROLLED, _altarsControlled);
-            DoUpdateWorldState(WS_BOSS_SHIELD, _shieldBroken ? 0 : 1);
+            AuroraPushWorldStates(this, _altarsControlled, _shieldBroken);
+        }
+
+        // Declared in campaign01.h, implemented in aurora_campaign01_progress.cpp
+        // so this file does not have to link against the character database
+        // helpers directly.
+        void RecordCapture(Player* player)
+        {
+            AuroraRecordAltarCapture(player, this);
+        }
+
+        void AddRaidDeath()
+        {
+            AuroraRecordRaidDeath(this);
         }
 
         // --------------------------------------------------------------------

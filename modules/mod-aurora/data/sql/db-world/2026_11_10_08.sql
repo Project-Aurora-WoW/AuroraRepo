@@ -1,0 +1,277 @@
+-- ============================================================================
+-- PROJECT AURORA v7.1.0 - WORLD database
+-- Custom spells for campaign #1 and the altar capture channel.
+--
+-- Why this file exists: aurora_shared.h refers to SPELL_DARK_SHIELD 500011,
+-- SPELL_SHADOW_BOLT 500010, SPELL_SUMMON_MINION 500012, SPELL_VULNERABLE
+-- 500030, SPELL_CAPTURE_CHANNEL 500020 and SPELL_DARKNESS_AURA 500001, but no
+-- SQL file ever created them. Without these rows CastSpell() silently does
+-- nothing: Malakor never shields, never drops the shield and never attacks.
+--
+-- Column counts follow the AzerothCore spell_dbc layout (AttributesEx4 added
+-- in 2021). Apply AFTER 2026_11_10_07.sql.
+--
+-- All spells are spawn-only (Attributes & 0x40 = SPELL_ATTR0_NOT_SHAPESHIFT
+-- is not used; instead Attributes = 0x00000000 and the NPC/hard-coded scripts
+-- are the only casters). Ranges are self/target, no mana, no cooldown - the
+-- script controls the cadence.
+-- ============================================================================
+
+SET NAMES utf8mb4;
+
+-- ----------------------------------------------------------------------------
+-- 1. 500001 Darkness Aura - periodic raid-wide shadow damage aura on Malakor.
+--    School: shadow (5). Self range. Duration 60 s, tick every 3 s.
+-- ----------------------------------------------------------------------------
+REPLACE INTO `spell_dbc`
+(`ID`,`Category`,`DispelType`,`Mechanic`,`Attributes`,`AttributesEx`,`AttributesEx2`,
+ `AttributesEx3`,`AttributesEx4`,`AttributesEx5`,`AttributesEx6`,`AttributesEx7`,
+ `ShapeshiftMask`,`ShapeshiftExclude`,`Targets`,`TargetCreatureType`,`RequiresSpellFocus`,
+ `FacingCasterFlags`,`CasterAuraState`,`TargetAuraState`,`ExcludeCasterAuraState`,
+ `ExcludeTargetAuraState`,`CasterAuraSpell`,`TargetAuraSpell`,`ExcludeCasterAuraSpell`,
+ `ExcludeTargetAuraSpell`,`CastingTimeIndex`,`RecoveryTime`,`CategoryRecoveryTime`,
+ `InterruptFlags`,`AuraInterruptFlags`,`ChannelInterruptFlags`,`ProcTypeMask`,`ProcChance`,
+ `ProcCharges`,`MaxLevel`,`BaseLevel`,`SpellLevel`,`DurationIndex`,`PowerType`,`ManaCost`,
+ `ManaCostPerLevel`,`ManaPerSecond`,`ManaPerSecondPerLevel`,`RangeIndex`,`Speed`,
+ `ModalNextSpell`,`StackAmount`,`Totem1`,`Totem2`,`Reagent1`,`Reagent2`,`Reagent3`,
+ `Reagent4`,`Reagent5`,`Reagent6`,`Reagent7`,`Reagent8`,`ReagentCount1`,`ReagentCount2`,
+ `ReagentCount3`,`ReagentCount4`,`ReagentCount5`,`ReagentCount6`,`ReagentCount7`,
+ `ReagentCount8`,`EquippedItemClass`,`EquippedItemSubclassMask`,`EquippedItemInventoryTypeMask`,
+ `Effect1`,`Effect2`,`Effect3`,`EffectDieSides1`,`EffectDieSides2`,`EffectDieSides3`,
+ `EffectRealPointsPerLevel1`,`EffectRealPointsPerLevel2`,`EffectRealPointsPerLevel3`,
+ `EffectBasePoints1`,`EffectBasePoints2`,`EffectBasePoints3`,`EffectMechanic1`,
+ `EffectMechanic2`,`EffectMechanic3`,`EffectImplicitTargetA1`,`EffectImplicitTargetA2`,
+ `EffectImplicitTargetA3`,`EffectImplicitTargetB1`,`EffectImplicitTargetB2`,
+ `EffectImplicitTargetB3`,`EffectRadiusIndex1`,`EffectRadiusIndex2`,`EffectRadiusIndex3`,
+ `EffectApplyAuraName1`,`EffectApplyAuraName2`,`EffectApplyAuraName3`,`EffectAmplitude1`,
+ `EffectAmplitude2`,`EffectAmplitude3`,`EffectMultipleValue1`,`EffectMultipleValue2`,
+ `EffectMultipleValue3`,`EffectChainTarget1`,`EffectChainTarget2`,`EffectChainTarget3`,
+ `EffectItemType1`,`EffectItemType2`,`EffectItemType3`,`EffectMiscValue1`,`EffectMiscValue2`,
+ `EffectMiscValue3`,`EffectMiscValueB1`,`EffectMiscValueB2`,`EffectMiscValueB3`,
+ `EffectTriggerSpell1`,`EffectTriggerSpell2`,`EffectTriggerSpell3`,`EffectPointsPerCombo1`,
+ `EffectPointsPerCombo2`,`EffectPointsPerCombo3`,`EffectSpellClassMaskA1`,
+ `EffectSpellClassMaskA2`,`EffectSpellClassMaskA3`,`EffectSpellClassMaskB1`,
+ `EffectSpellClassMaskB2`,`EffectSpellClassMaskB3`,`EffectSpellClassMaskC1`,
+ `EffectSpellClassMaskC2`,`EffectSpellClassMaskC3`,`SpellName1`,`NameSubtext1`,
+ `SpellName2`,`NameSubtext2`,`SpellName3`,`NameSubtext3`,`SpellDescription1`,
+ `SpellDescription2`,`SpellDescription3`,`SpellIconID`,`ActiveIconID`,`SpellPriority`,
+ `SpellName`,`NameSubtext`,`SpellDescription`,`AuraDescription`,`ManaCostPct`,
+ `StartRecoveryCategory`,`StartRecoveryTime`,`MaxTargetLevel`,`SpellFamilyName`,
+ `SpellFamilyFlags1`,`SpellFamilyFlags2`,`MaxAffectedTargets`,`DmgClass`,`PreventionType`,
+ `StanceBarOrder`,`DmgMultiplier1`,`DmgMultiplier2`,`DmgMultiplier3`,`MinFactionID`,
+ `MinReputation`,`RequiredAuraVision`,`TotemCategory1`,`TotemCategory2`,`AreaGroupID`,
+ `SchoolMask`,`RuneCostID`,`SpellMissileID`,`PowerDisplayID`,`EffectBonusMultiplier1`,
+ `EffectBonusMultiplier2`,`EffectBonusMultiplier3`,`SpellDifficultyID`)
+VALUES
+(500001,0,0,0,0,0,0,0,0,0,0,0,
+ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,101,0,0,0,0,
+ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+ -1,0,0,
+ 6,0,0,
+ 1,1,1,
+ 0,0,0,
+ -50,0,0,
+ 0,0,0,
+ 1,0,0,
+ 0,0,0,
+ 10,0,0,
+ 3,0,0,
+ 3000,0,0,
+ 0,0,0,
+ 0,0,0,
+ 0,0,0,
+ 0,0,0,
+ 0,0,0,0,0,0,0,0,0,0,0,0,
+ 'Тёмная аура','','','','','',
+ 'Наносит урон от тёмной магии всем противникам поблизости.',
+ '','',
+ 0,0,0,
+ 'Тёмная аура','','','',
+ 0,0,0,0,
+ 0,0,0,0,0,0,
+ 0,1,1,1,
+ 0,0,0,
+ 0,0,
+ 32,0,0,0,
+ 1,1,1,0),
+
+-- ----------------------------------------------------------------------------
+-- 2. 500010 Shadow Bolt - Malakor/Vespera single-target shadow damage.
+--    2.5 s cast, 8-30 yd, 12 s cooldown is not set: the AI schedules it.
+-- ----------------------------------------------------------------------------
+(500010,0,0,0,0,0,0,0,0,0,0,0,
+ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,101,0,0,0,0,
+ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+ -1,0,0,
+ 2,0,0,
+ 1,1,1,
+ 0,0,0,
+ -800,0,0,
+ 0,0,0,
+ 1,0,0,
+ 0,0,0,
+ 10,0,0,
+ 3,0,0,
+ 0,0,0,
+ 0,0,0,
+ 0,0,0,
+ 0,0,0,
+ 0,0,0,
+ 0,0,0,0,0,0,0,0,0,0,0,0,
+ 'Теневая стрела Авроры','','','','','',
+ 'Тёмный снаряд, наносящий урон от тёмной магии.',
+ '','',
+ 0,0,0,
+ 'Теневая стрела Авроры','','','',
+ 0,0,0,0,
+ 0,0,0,0,0,0,
+ 0,1,1,1,
+ 0,0,0,
+ 0,0,
+ 32,0,0,0,
+ 1,1,1,0),
+
+-- ----------------------------------------------------------------------------
+-- 3. 500011 Dark Shield - Malakor immunity shell for the PvP phase.
+--    Attribute 0x00000001 points only at the caster; UNIT_FLAG handling is
+--    done by the AI. Duration 30 min so a long PvP phase cannot time it out.
+-- ----------------------------------------------------------------------------
+(500011,0,0,0,0,0,0,0,0,0,0,0,
+ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,101,0,0,0,0,
+ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+ -1,0,0,
+ 6,0,0,
+ 1,1,1,
+ 0,0,0,
+ 0,0,0,
+ 0,0,0,
+ 1,0,0,
+ 0,0,0,
+ 0,0,0,
+ 3,0,0,
+ 1800000,0,0,
+ 0,0,0,
+ 0,0,0,
+ 0,0,0,
+ 0,0,0,
+ 0,0,0,0,0,0,0,0,0,0,0,0,
+ 'Тёмный щит','','','','','',
+ 'Малакор неуязвим, пока щит держится. Щит снимается захватом трёх алтарей.',
+ '','',
+ 0,0,0,
+ 'Тёмный щит','','','',
+ 0,0,0,0,
+ 0,0,0,0,0,0,
+ 0,1,1,1,
+ 0,0,0,
+ 0,0,
+ 1,0,0,0,
+ 1,1,1,0),
+
+-- ----------------------------------------------------------------------------
+-- 4. 500012 Summon Minion - spawns one NPC_SHADOW_MINION (150030).
+--    Effect 28 = SPELL_EFFECT_SUMMON with MiscValue 150030, instant.
+-- ----------------------------------------------------------------------------
+(500012,0,0,0,0,0,0,0,0,0,0,0,
+ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,101,0,0,0,0,
+ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+ -1,0,0,
+ 28,0,0,
+ 1,1,1,
+ 0,0,0,
+ 0,0,0,
+ 0,0,0,
+ 1,0,0,
+ 0,0,0,
+ 0,0,0,
+ 8,0,0,
+ 0,0,0,
+ 0,0,0,
+ 0,0,0,
+ 0,0,0,
+ 0,0,0,0,0,0,0,0,0,0,0,0,
+ 'Призыв тени','','','','','',
+ 'Призывает тень Ноктиса на поле боя.',
+ '','',
+ 0,0,0,
+ 'Призыв тени','','','',
+ 0,0,0,0,
+ 0,0,0,0,0,0,
+ 0,1,1,1,
+ 0,0,0,
+ 0,0,
+ 0,0,0,0,
+ 1,1,1,0),
+
+-- ----------------------------------------------------------------------------
+-- 5. 500020 Capture Channel - visual/interaction channel while an altar is
+--    being taken. Effect 6 = SPELL_EFFECT_APPLY_AURA, aura 23 = PERIODIC_TRIGGER
+--    is not used; aura 0 (none) keeps it purely cosmetic. Duration 10 s,
+--    matching CAPTURE_TIME_MS.
+-- ----------------------------------------------------------------------------
+(500020,0,0,0,0,0,0,0,0,0,0,0,
+ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,101,0,0,0,0,
+ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+ -1,0,0,
+ 6,0,0,
+ 1,1,1,
+ 0,0,0,
+ 0,0,0,
+ 0,0,0,
+ 1,0,0,
+ 0,0,0,
+ 0,0,0,
+ 0,0,0,
+ 10000,0,0,
+ 0,0,0,
+ 0,0,0,
+ 0,0,0,
+ 0,0,0,
+ 0,0,0,0,0,0,0,0,0,0,0,0,
+ 'Захват алтаря','','','','','',
+ 'Канал захвата алтаря.',
+ '','',
+ 0,0,0,
+ 'Захват алтаря','','','',
+ 0,0,0,0,
+ 0,0,0,0,0,0,
+ 0,1,1,1,
+ 0,0,0,
+ 0,0,
+ 1,0,0,0,
+ 1,1,1,0),
+
+-- ----------------------------------------------------------------------------
+-- 6. 500030 Vulnerable - damage-taken increase applied by the instance script
+--    when the fourth altar is captured (4-altar bonus: +100% damage taken).
+-- ----------------------------------------------------------------------------
+(500030,0,0,0,0,0,0,0,0,0,0,0,
+ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,101,0,0,0,0,
+ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+ -1,0,0,
+ 6,0,0,
+ 1,1,1,
+ 0,0,0,
+ 100,0,0,
+ 0,0,0,
+ 1,0,0,
+ 0,0,0,
+ 0,0,0,
+ 0,0,0,
+ 0,0,0,
+ 0,0,0,
+ 0,0,0,
+ 0,0,0,
+ 0,0,0,0,0,0,0,0,0,0,0,0,
+ 'Уязвимость','','','','','',
+ 'Полученный урон увеличен на 100%.',
+ '','',
+ 0,0,0,
+ 'Уязвимость','','','',
+ 0,0,0,0,
+ 0,0,0,0,0,0,
+ 0,1,1,1,
+ 0,0,0,
+ 0,0,
+ 68,0,0,0,
+ 1,1,1,0);

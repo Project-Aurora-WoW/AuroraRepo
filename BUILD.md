@@ -55,7 +55,7 @@
 | 05 | — | `aurora_shop_purchases` |
 | 06 | тексты gossip | — |
 | 07 | RBAC-права `.aurora shop buy` / `.aurora vote cast` | — |
-| 08 | — | `aurora_pending_grants` |
+| 08 | кастомные спеллы кампании (`spell_dbc` 500001–500030) | `aurora_pending_grants` |
 
 ```bash
 mysql -u root -p acore_world      < modules/mod-aurora/data/sql/db-world/2026_11_10_00.sql
@@ -98,18 +98,23 @@ SHOW TABLES LIKE 'aurora_v_weights';          -- 1
 
 ## 4. Конфигурация
 
-В `worldserver.conf` секция Aurora не обязательна: значения зашиты в
-`aurora_config.h`. Если нужна настройка без пересборки, добавьте:
+Ключи в `worldserver.conf` читаются один раз при старте
+(`aurora_settings.cpp`). Если ключ отсутствует, берётся значение из
+`aurora_config.h`:
 
 ```ini
 Aurora.Enable = 1
+Aurora.Core.Enabled = 1
 Aurora.Campaign.01.Enabled = 1
 Aurora.Shop.Enabled = 1
 Aurora.Voting.Enabled = 1
+Aurora.Events.Enabled = 1
+Aurora.OnlineRewards.Enabled = 1
 Aurora.Localization.Default = ruRU
 ```
 
-(Эти ключи пока не читаются — модуль берёт значения из заголовка.)
+`Aurora.Enable = 0` выключает модуль целиком: bootstrap не трогает таблицы,
+магазин и голосование отвечают «отключено».
 
 ## 5. Команды после сборки
 

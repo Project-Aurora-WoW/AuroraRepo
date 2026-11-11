@@ -226,6 +226,19 @@ namespace Aurora
     bool IsAuroraMapRange(uint32 mapId);
 
     std::string const& GetCampaignName(uint32 campaignId, std::string const& locale);
+
+    // ------------------------------------------------------------------------
+    // Runtime settings, read from worldserver.conf once per process.
+    // See aurora_settings.cpp for the keys and their defaults.
+    // ------------------------------------------------------------------------
+    void LoadSettings();
+    bool IsProjectEnabled();
+    bool IsCampaignEnabled(uint32 campaignId);
+    bool IsShopEnabled();
+    bool IsVotingEnabled();
+    bool IsEventsEnabled();
+    bool IsStreakEnabled();
+    std::string const& GetDefaultLocale();
 }
 
 #endif // AURORA_SHARED_H
