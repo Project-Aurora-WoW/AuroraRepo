@@ -15,6 +15,8 @@
 
 local ADDON_NAME = ...
 
+local AuroraDBC = AuroraDBC or {}
+
 local ITEM_SHARDS = 50001
 local ITEM_AURORA = 50100
 
@@ -95,6 +97,12 @@ local function MakePanel(name, width, height)
     border:SetTexture(1, 0.82, 0, 0.35)
 
     return frame
+end
+-- ============================================================================
+-- Парсер DBC кампании (см. AuroraDBC.lua)
+-- ============================================================================
+local function GetCampaignPatchState()
+    return AuroraDBC.CheckCampaignPatch()
 end
 
 -- ============================================================================
@@ -394,6 +402,18 @@ SlashCmdList["AURORAUI"] = function(msg)
         UpdateTracker()
     elseif cmd == "menu" then
         ShowTab("campaign")
+        menu:Show()
+    elseif cmd == "patch" then
+        local state, known, total, firstMissing = GetCampaignPatchState()
+        if state == "patched" then
+            DEFAULT_CHAT_FRAME:AddMessage(format("|cffFFD100[Aurora UI]|r DBC-патч установлен: %d из %d достижений.", known, total))
+        elseif state == "partial" then
+            DEFAULT_CHAT_FRAME:AddMessage(format("|cffFFD100[Aurora UI]|r DBC-патч неполный: %d из %d, первое отсутствующее ID %d.", known, total, firstMissing))
+        elseif state == "unknown" then
+            DEFAULT_CHAT_FRAME:AddMessage("|cffFFD100[Aurora UI]|r Проверка DBC недоступна.")
+        else
+            DEFAULT_CHAT_FRAME:AddMessage("|cffFFD100[Aurora UI]|r DBC-патч не установлен: достижения кампании клиенту неизвестны.")
+        end
         menu:Show()
     else
         DEFAULT_CHAT_FRAME:AddMessage("|cffFFD100[Aurora UI]|r /aui menu | events | tracker")
