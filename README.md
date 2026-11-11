@@ -22,7 +22,7 @@
 | `Core/aurora_voting_engine.cpp` | пересчёт баллов и выплаты победителям |
 | `Campaigns/Campaign01_NightOfTheFallen/` | инстанс, боссы, алтари, Стражи |
 
-**`sql/`** — четыре файла, применяются в порядке номеров
+**`sql/`** — шесть файлов, применяются в порядке номеров
 
 | Файл | База |
 |---|---|
@@ -30,6 +30,8 @@
 | `02_aurora_world_data.sql` | world |
 | `03_aurora_spawns.sql` | world |
 | `04_character_procedures.sql` | **character** |
+| `05_character_extra_tables.sql` | character |
+| `06_aurora_shop_purchases.sql` | character |
 
 **`addon/AuroraUI/`** — готовый к установке клиентский аддон (без внешних зависимостей).
 

@@ -10,7 +10,8 @@
 | `sql/02_aurora_world_data.sql` | WORLD | Кампании, локации, NPC/GO шаблоны, предметы, квесты, магазин, эвенты, награды. |
 | `sql/03_aurora_spawns.sql` | WORLD | Спавны NPC и алтарей на карте 950 и порталы в хабах. |
 | `sql/04_character_procedures.sql` | **CHARACTER** | Все процедуры `sp_Aurora*` + зеркало весов `aurora_v_weights`. |
-| `sql/06_aurora_shop_purchases.sql` | CHARACTER | Журнал покупок магазина. |
+| `sql/05_character_extra_tables.sql` | CHARACTER | Журнал покупок, расчёты голосов, счётчики кампании, активности. |
+| `sql/06_aurora_shop_purchases.sql` | CHARACTER | Журнал покупок магазина (совместимость). |
 
 **Почему процедуры на character, а не на world.** Всё, что они читают и пишут
 (`aurora_player_activity`, `aurora_vote_candidates`, `aurora_votes`,
@@ -50,9 +51,9 @@ sql/updates/aurora/2026_11_10_01.sql   -> 02_aurora_world_data.sql
 
 ```sql
 -- WORLD
-SELECT COUNT(*) FROM aurora_campaigns;            -- ожидается 17
+SELECT COUNT(*) FROM aurora_campaigns;            -- 1 (кампания #1)
 SELECT COUNT(*) FROM aurora_events;               -- ожидается 8
-SELECT COUNT(*) FROM aurora_shop_items;           -- ожидается ~17
+SELECT COUNT(*) FROM aurora_shop_items;           -- по каталогу
 SELECT COUNT(*) FROM aurora_visual_enchants;      -- ожидается 8
 
 -- CHARACTER
