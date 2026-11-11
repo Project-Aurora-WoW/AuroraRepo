@@ -1,0 +1,34 @@
+# ---- бинарники и артефакты сборки ----
+build/
+bin/
+*.exe
+*.dll
+*.lib
+*.obj
+*.pdb
+*.ilk
+*.exp
+
+# ---- конфигурация с секретами ----
+*.conf
+!conf/*.dist
+.env
+.env.*
+
+# ---- IDE ----
+.vs/
+.vscode/
+*.user
+*.suo
+
+# ---- SQL-дампы с реальными данными ----
+*.sql.gz
+*.dump
+dumps/
+
+# ---- временное ----
+*.log
+*.bak
+*.tmp
+Thumbs.db
+desktop.ini

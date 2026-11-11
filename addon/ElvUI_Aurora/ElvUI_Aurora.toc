@@ -1,0 +1,19 @@
+## 1. ElvUI_Aurora.toc
+## Interface: 30300
+## Title: |cffFFD100ElvUI|r |cff00ccffAurora|r
+## Notes: Project Aurora - tracker, shop, voting, events
+## Notes-ruRU: Проект Аврора - трекер, магазин, голосование, эвенты
+## Author: Aurora Team
+## Version: 7.1.0
+## RequiredDeps: ElvUI
+## SavedVariables: ElvUIAuroraDB
+
+Core\init.lua
+Core\data.lua
+Core\localization.lua
+Modules\tracker.lua
+Modules\events.lua
+Modules\currency.lua
+Modules\main_menu.lua
+Localization\enUS.lua
+Localization\ruRU.lua

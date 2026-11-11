@@ -1,0 +1,9 @@
+## Interface: 30300
+## Title: Aurora UI - Night of the Fallen
+## Title-ruRU: Аврора - Ночь Падших
+## Notes: Client HUD for the Aurora campaign module (tracker, events, currency, shop/vote links).
+## Notes-ruRU: Интерфейс модуля «Аврора»: трекер алтарей, эвенты, валюта, ссылки на магазин и голосование.
+## Author: Aurora Team
+## Version: 7.1.0
+
+AuroraUI.lua
