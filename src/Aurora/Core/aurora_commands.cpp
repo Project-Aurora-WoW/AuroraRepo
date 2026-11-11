@@ -572,22 +572,25 @@ public:
 
     ChatCommandTable GetCommands() const override
     {
+        // Read-only surfaces stay on the help permission so every player can
+        // use them. Everything that writes (purchase, vote) is separated.
         static ChatCommandTable shopCommands =
         {
             { "list", HandleShopListCommand, rbac::RBAC_PERM_COMMAND_HELP, Console::No },
-            { "buy",  HandleShopBuyCommand,  rbac::RBAC_PERM_COMMAND_HELP, Console::No },
+            { "buy",  HandleShopBuyCommand,  rbac::RBAC_PERM_COMMAND_AURORA_SHOP, Console::No },
         };
 
         static ChatCommandTable voteCommands =
         {
             { "list", HandleVoteListCommand, rbac::RBAC_PERM_COMMAND_HELP, Console::No },
             { "top",  HandleVoteTopCommand,  rbac::RBAC_PERM_COMMAND_HELP, Console::No },
-            { "cast", HandleVoteCastCommand, rbac::RBAC_PERM_COMMAND_HELP, Console::No },
+            { "cast", HandleVoteCastCommandLocked, rbac::RBAC_PERM_COMMAND_AURORA_VOTE, Console::No },
         };
 
         static ChatCommandTable reloadCommands =
         {
-            { "shop", HandleReloadShopCommand, rbac::RBAC_PERM_COMMAND_RELOAD_ALL, Console::Yes },
+            { "shop",   HandleReloadShopCommand,   rbac::RBAC_PERM_COMMAND_RELOAD_ALL, Console::Yes },
+            { "gossip", HandleReloadGossipCommand, rbac::RBAC_PERM_COMMAND_RELOAD_ALL, Console::Yes },
         };
 
         static ChatCommandTable auroraCommands =
@@ -669,6 +672,32 @@ private:
         handler->PSendSysMessage("|cff00ff00[Aurora]|r {} shop entries reloaded.",
                                  g_shopOrder.size());
         return true;
+    }
+
+    static bool HandleReloadGossipCommand(ChatHandler* handler)
+    {
+        AuroraLoadGossipTexts();
+        handler->PSendSysMessage("|cff00ff00[Aurora]|r Gossip texts reloaded.");
+        return true;
+    }
+
+    // The vote command needs proof that the player is a real participant, so
+    // it is not exposed through the help permission like the read-only ones.
+    static bool HandleVoteCastCommandLocked(ChatHandler* handler, std::string const& category, uint32 rank)
+    {
+        Player* player = GetPlayer(handler);
+        if (!player)
+            return false;
+
+        if (!player->GetSession()->HasPermission(rbac::RBAC_PERM_COMMAND_AURORA_VOTE))
+        {
+            handler->PSendSysMessage("|cffff0000[Aurora]|r %s",
+                Tr(player, "Голосование временно недоступно. Обратитесь к администрации.",
+                           "Voting is currently unavailable. Please contact an administrator."));
+            return true;
+        }
+
+        return CastVote(player, category, rank);
     }
 };
 

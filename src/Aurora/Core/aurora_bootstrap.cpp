@@ -22,6 +22,9 @@ using namespace Aurora;
 // Defined in aurora_commands.cpp
 void AuroraLoadShopCatalogue();
 
+// Defined in npc_campaign01_questgivers.cpp
+void AuroraLoadGossipTexts();
+
 namespace
 {
     struct TableCheck
@@ -95,6 +98,7 @@ public:
         }
 
         AuroraLoadShopCatalogue();
+        AuroraLoadGossipTexts();
 
         QueryResult live = WorldDatabase.Query(
             "SELECT `internal_name` FROM `aurora_campaigns` WHERE `status` = 'live'");

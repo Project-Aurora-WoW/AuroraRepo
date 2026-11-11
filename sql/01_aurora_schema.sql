@@ -256,6 +256,24 @@ CREATE TABLE IF NOT EXISTS `aurora_lore_chronicles` (
     REFERENCES `aurora_campaigns` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+-- ----------------------------------------------------------------------------
+-- 1.11. Gossip menu item texts (bilingual; edited in DB, no server rebuild)
+-- One row per gossip item per NPC. `action` is the C++-side action identifier
+-- ('chain' / 'leave'); `sort_order` controls the display order per NPC.
+-- ----------------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS `aurora_gossip_texts` (
+  `id`            INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `creature_entry` INT UNSIGNED NOT NULL COMMENT 'creature_template.entry this item belongs to',
+  `action`        VARCHAR(32) NOT NULL COMMENT 'C++ action identifier: chain, leave, ...',
+  `text_ru`       VARCHAR(255) NOT NULL,
+  `text_en`       VARCHAR(255) NOT NULL,
+  `icon`          TINYINT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'GOSSIP_ICON_* value (uint8)',
+  `sort_order`    INT UNSIGNED NOT NULL DEFAULT 0,
+  `enabled`       TINYINT UNSIGNED NOT NULL DEFAULT 1,
+  PRIMARY KEY (`id`),
+  KEY `idx_creature_sort` (`creature_entry`, `sort_order`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='Aurora gossip menu item texts';
+
 -- ============================================================================
 -- SECTION 2. CHARACTER DATABASE
 -- ============================================================================
