@@ -14,6 +14,7 @@ void AddSC_aurora_daily_streak();
 void AddSC_aurora_voting_engine();
 void AddSC_aurora_visual_enchants();
 void AddSC_aurora_lore();
+void AddSC_aurora_daily_quests();
 void AddSC_night_of_the_fallen();
 void AddSC_boss_malakor();
 void AddSC_boss_vespera();

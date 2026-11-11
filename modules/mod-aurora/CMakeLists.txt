@@ -28,6 +28,7 @@ set(AURORA_CORE_SOURCES
     ${AURORA_ROOT_DIR}/src/Aurora/Core/aurora_visual_enchants.cpp
     ${AURORA_ROOT_DIR}/src/Aurora/Core/aurora_lore.cpp
     ${AURORA_ROOT_DIR}/src/Aurora/Core/aurora_settings.cpp
+    ${AURORA_ROOT_DIR}/src/Aurora/Core/aurora_daily_quests.cpp
 )
 
 set(AURORA_CAMPAIGN01_DIR ${AURORA_ROOT_DIR}/src/Aurora/Campaigns/Campaign01_NightOfTheFallen)
