@@ -37,8 +37,10 @@ namespace
     // ------------------------------------------------------------------------
     bool IsRussian(Player const* player)
     {
+        // Console, or a session without a DBC locale: fall back to the
+        // server-wide default from Aurora.Localization.Default.
         if (!player || !player->GetSession())
-            return true;
+            return GetDefaultLocale() == "ruRU";
 
         return player->GetSession()->GetSessionDbcLocale() == LOCALE_ruRU;
     }

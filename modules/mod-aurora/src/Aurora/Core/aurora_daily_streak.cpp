@@ -157,7 +157,7 @@ public:
 
     void OnPlayerLogin(Player* player) override
     {
-        if (!player)
+        if (!player || !IsStreakEnabled())
             return;
 
         LoadRewards();

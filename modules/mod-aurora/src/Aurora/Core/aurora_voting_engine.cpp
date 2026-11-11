@@ -113,6 +113,9 @@ public:
 
     void OnUpdate(uint32 diff) override
     {
+        if (!IsVotingEnabled())
+            return;
+
         _scoreTimer += diff;
         if (_scoreTimer >= SCORE_TICK_MS)
         {

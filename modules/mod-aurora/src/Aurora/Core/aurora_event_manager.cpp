@@ -335,6 +335,9 @@ public:
 
     void OnUpdate(uint32 diff) override
     {
+        if (!IsEventsEnabled())
+            return;
+
         _timer += diff;
         _activityTimer += diff;
 
