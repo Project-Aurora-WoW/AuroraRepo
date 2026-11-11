@@ -145,7 +145,47 @@ VALUES
 -- client DBCs and rewrites mismatched values in memory with a log error.
 -- The UPDATEs below make the database agree so a load pass stays silent.
 -- Generated from a real server load; rerun after changing item visuals.
--- ============================================================================UPDATE `item_template` SET `Material` = 8, `InventoryType` = 5, `displayid` = 64426 WHERE `entry` = 50001;
+-- ============================================================================
+-- Class/Subclass/Sheath for the same entries: the first pass only reported
+-- Material/InventoryType/DisplayInfoID, the rest surfaced on later loads.
+UPDATE `item_template` SET `class` = 4, `subclass` = 2 WHERE `entry` = 50001;
+UPDATE `item_template` SET `class` = 4, `subclass` = 4 WHERE `entry` = 50010;
+UPDATE `item_template` SET `class` = 4, `subclass` = 1 WHERE `entry` = 50011;
+UPDATE `item_template` SET `subclass` = 4 WHERE `entry` = 50020;
+UPDATE `item_template` SET `subclass` = 2 WHERE `entry` = 50021;
+UPDATE `item_template` SET `subclass` = 3 WHERE `entry` = 50022;
+UPDATE `item_template` SET `subclass` = 0 WHERE `entry` = 50023;
+UPDATE `item_template` SET `class` = 4, `subclass` = 3 WHERE `entry` = 50030;
+UPDATE `item_template` SET `class` = 4, `subclass` = 1 WHERE `entry` = 50032;
+UPDATE `item_template` SET `class` = 2, `subclass` = 4 WHERE `entry` = 50050;
+UPDATE `item_template` SET `class` = 2, `subclass` = 4 WHERE `entry` = 50051;
+UPDATE `item_template` SET `class` = 4, `subclass` = 4 WHERE `entry` = 50060;
+UPDATE `item_template` SET `class` = 4 WHERE `entry` = 50061;
+UPDATE `item_template` SET `class` = 4, `subclass` = 4 WHERE `entry` = 50100;
+UPDATE `item_template` SET `class` = 4, `subclass` = 3 WHERE `entry` = 50201;
+UPDATE `item_template` SET `class` = 4, `subclass` = 3 WHERE `entry` = 50202;
+UPDATE `item_template` SET `class` = 2, `subclass` = 15 WHERE `entry` = 50203;
+UPDATE `item_template` SET `class` = 2, `subclass` = 19 WHERE `entry` = 50204;
+UPDATE `item_template` SET `subclass` = 2 WHERE `entry` = 50300;
+UPDATE `item_template` SET `class` = 15, `subclass` = 0 WHERE `entry` = 50301;
+UPDATE `item_template` SET `class` = 2, `subclass` = 7 WHERE `entry` = 50302;
+UPDATE `item_template` SET `class` = 2 WHERE `entry` = 50303;
+UPDATE `item_template` SET `subclass` = 3 WHERE `entry` = 50304;
+UPDATE `item_template` SET `subclass` = 0 WHERE `entry` = 50310;
+UPDATE `item_template` SET `subclass` = 4 WHERE `entry` = 50311;
+UPDATE `item_template` SET `subclass` = 0 WHERE `entry` = 50313;
+UPDATE `item_template` SET `subclass` = 1 WHERE `entry` = 50314;
+UPDATE `item_template` SET `class` = 12, `subclass` = 0 WHERE `entry` = 50320;
+UPDATE `item_template` SET `subclass` = 4 WHERE `entry` = 50321;
+UPDATE `item_template` SET `subclass` = 4 WHERE `entry` = 50322;
+UPDATE `item_template` SET `subclass` = 4 WHERE `entry` = 50323;
+UPDATE `item_template` SET `subclass` = 4 WHERE `entry` = 50324;
+UPDATE `item_template` SET `class` = 15, `subclass` = 0 WHERE `entry` = 50330;
+UPDATE `item_template` SET `class` = 15, `subclass` = 0 WHERE `entry` = 50331;
+UPDATE `item_template` SET `class` = 15, `subclass` = 0 WHERE `entry` = 50332;
+UPDATE `item_template` SET `subclass` = 2 WHERE `entry` = 50333;
+UPDATE `item_template` SET `sheath` = 2 WHERE `entry` = 50040;
+UPDATE `item_template` SET `sheath` = 3 WHERE `entry` IN (50050,50051,50203,50302,50303);UPDATE `item_template` SET `Material` = 8, `InventoryType` = 5, `displayid` = 64426 WHERE `entry` = 50001;
 UPDATE `item_template` SET `Material` = 1, `InventoryType` = 6, `displayid` = 64660 WHERE `entry` = 50010;
 UPDATE `item_template` SET `Material` = 7, `InventoryType` = 10, `displayid` = 65002 WHERE `entry` = 50011;
 UPDATE `item_template` SET `Material` = 6, `InventoryType` = 3, `displayid` = 64622 WHERE `entry` = 50020;
