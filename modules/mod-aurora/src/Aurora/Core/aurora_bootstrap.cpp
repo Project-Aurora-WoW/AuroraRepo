@@ -122,6 +122,8 @@ public:
         }
 
         LOG_INFO("module", "[Aurora] Bootstrap complete.");
+
+        VerifyCampaignRegistry();
     }
 };
 

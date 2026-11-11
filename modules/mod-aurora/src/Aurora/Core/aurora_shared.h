@@ -234,6 +234,33 @@ namespace Aurora
     void LoadSettings();
     bool IsProjectEnabled();
     bool IsCampaignEnabled(uint32 campaignId);
+
+    // ------------------------------------------------------------------------
+    // Campaign and quest chain registry, see aurora_campaigns.cpp
+    // ------------------------------------------------------------------------
+    struct QuestChain
+    {
+        uint8       faction;   // 0 = Alliance, 1 = Horde, 2 = neutral
+        uint32      first;
+        uint32      last;
+        char const* labelRu;
+        char const* labelEn;
+    };
+
+    struct CampaignEntry
+    {
+        uint32                   id;
+        char const*              internalName;
+        uint32                   mapId;
+        bool                     scripted;
+        std::vector<QuestChain>  chains;
+    };
+
+    CampaignEntry const* FindCampaign(uint32 campaignId);
+    bool IsCampaignPlayable(uint32 campaignId);
+    std::vector<QuestChain> const* GetCampaignChains(uint32 campaignId);
+    uint32 CountCampaignQuests(uint32 campaignId);
+    void VerifyCampaignRegistry();
     bool IsShopEnabled();
     bool IsVotingEnabled();
     bool IsEventsEnabled();
