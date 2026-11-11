@@ -105,9 +105,9 @@ VALUES
   (50061,15,0,'Факел Сумерек',4091,2,64,1,50000,0,0,80,80,1,1,'Игрушка'),
   (50203,4,1,'Маска Эониса',33429,3,0,1,100000,20000,1,80,80,1,1,'Трансмогрификация'),
   (50204,15,0,'Знамя Ночи',15365,3,64,1,50000,0,0,80,80,1,1,'Игрушка'),
-  (50205,4,1,'Перчатки Теневого Гонга',33429,3,0,1,80000,16000,10,80,80,1,1,'Трансмогрификация'),
+  (50205,4,1,'Перчатки Теневого Гонга',33429,3,0,1,80000,16000,10,80,80,1,1,'Трансмогрификация');
 
-  -- Campaign sets. item_template keeps the 16-column shape used everywhere else
+-- Campaign sets. item_template keeps the 16-column shape used everywhere else
 -- in this file; stats, armour and weapon damage are applied below by UPDATE so
 -- the REPLACE INTO stays compatible with stock AzerothCore item_template.
 REPLACE INTO `item_template`
@@ -137,6 +137,53 @@ VALUES
   (50332,2,10,'Посох Весталки',1000,4,0,1,900000,180000,17,200,80,1,1,'Оружие комплекта Весталки'),
   (50333,4,1,'Плащ Хранителя Собора',1000,4,0,1,500000,100000,16,200,80,1,1,'Плащ кампании'),
   (50334,4,0,'Печать Равновесия',1000,4,0,1,700000,140000,12,200,80,1,1,'Аксессуар кампании');
+
+-- ============================================================================
+-- ITEM ATTRIBUTES ALIGNED WITH Item.dbc
+-- With DBC.EnforceItemAttributes = 1 (default) the core checks Class,
+-- Subclass, Material, InventoryType, DisplayInfoID and Sheath against the
+-- client DBCs and rewrites mismatched values in memory with a log error.
+-- The UPDATEs below make the database agree so a load pass stays silent.
+-- Generated from a real server load; rerun after changing item visuals.
+-- ============================================================================UPDATE `item_template` SET `Material` = 8, `InventoryType` = 5, `displayid` = 64426 WHERE `entry` = 50001;
+UPDATE `item_template` SET `Material` = 1, `InventoryType` = 6, `displayid` = 64660 WHERE `entry` = 50010;
+UPDATE `item_template` SET `Material` = 7, `InventoryType` = 10, `displayid` = 65002 WHERE `entry` = 50011;
+UPDATE `item_template` SET `Material` = 6, `InventoryType` = 3, `displayid` = 64622 WHERE `entry` = 50020;
+UPDATE `item_template` SET `Material` = 8, `InventoryType` = 10, `displayid` = 64424 WHERE `entry` = 50021;
+UPDATE `item_template` SET `Material` = 5, `InventoryType` = 3, `displayid` = 64819 WHERE `entry` = 50022;
+UPDATE `item_template` SET `Material` = 4, `InventoryType` = 2, `displayid` = 64213 WHERE `entry` = 50023;
+UPDATE `item_template` SET `Material` = 5, `InventoryType` = 9, `displayid` = 65034 WHERE `entry` = 50030;
+UPDATE `item_template` SET `Material` = 7, `InventoryType` = 9, `displayid` = 64165 WHERE `entry` = 50032;
+UPDATE `item_template` SET `Material` = 2, `displayid` = 64340 WHERE `entry` = 50040;
+UPDATE `item_template` SET `Material` = 1, `InventoryType` = 13, `displayid` = 41873 WHERE `entry` = 50050;
+UPDATE `item_template` SET `Material` = 2, `InventoryType` = 21, `displayid` = 64954 WHERE `entry` = 50051;
+UPDATE `item_template` SET `Material` = -1, `InventoryType` = 1, `displayid` = 64688 WHERE `entry` = 50060;
+UPDATE `item_template` SET `Material` = 4, `InventoryType` = 2, `displayid` = 64203 WHERE `entry` = 50061;
+UPDATE `item_template` SET `Material` = 6, `InventoryType` = 9, `displayid` = 63569 WHERE `entry` = 50100;
+UPDATE `item_template` SET `Material` = 5, `InventoryType` = 7, `displayid` = 59257 WHERE `entry` = 50201;
+UPDATE `item_template` SET `Material` = 5, `InventoryType` = 1, `displayid` = 65040 WHERE `entry` = 50202;
+UPDATE `item_template` SET `Material` = 1, `InventoryType` = 13, `displayid` = 64768 WHERE `entry` = 50203;
+UPDATE `item_template` SET `Material` = 2, `InventoryType` = 26, `displayid` = 64700 WHERE `entry` = 50204;
+UPDATE `item_template` SET `Material` = 7, `InventoryType` = 16, `displayid` = 28951 WHERE `entry` = 50205;
+UPDATE `item_template` SET `Material` = 8, `displayid` = 64559 WHERE `entry` = 50300;
+UPDATE `item_template` SET `Material` = 4, `InventoryType` = 0, `displayid` = 35407 WHERE `entry` = 50301;
+UPDATE `item_template` SET `Material` = 1, `InventoryType` = 13, `displayid` = 64756 WHERE `entry` = 50302;
+UPDATE `item_template` SET `Material` = 2, `InventoryType` = 13, `displayid` = 64755 WHERE `entry` = 50303;
+UPDATE `item_template` SET `Material` = 5, `displayid` = 64704 WHERE `entry` = 50304;
+UPDATE `item_template` SET `Material` = 4, `InventoryType` = 2, `displayid` = 64197 WHERE `entry` = 50310;
+UPDATE `item_template` SET `Material` = 6, `InventoryType` = 1, `displayid` = 64950 WHERE `entry` = 50311;
+UPDATE `item_template` SET `Material` = 8, `InventoryType` = 5, `displayid` = 64547 WHERE `entry` = 50312;
+UPDATE `item_template` SET `Material` = 3, `InventoryType` = 11, `displayid` = 44358 WHERE `entry` = 50313;
+UPDATE `item_template` SET `Material` = 7, `InventoryType` = 6, `displayid` = 64953 WHERE `entry` = 50314;
+UPDATE `item_template` SET `Material` = 7, `InventoryType` = 0, `displayid` = 34656 WHERE `entry` = 50320;
+UPDATE `item_template` SET `Material` = 6, `InventoryType` = 6, `displayid` = 63928 WHERE `entry` = 50321;
+UPDATE `item_template` SET `Material` = 6, `InventoryType` = 9, `displayid` = 63927 WHERE `entry` = 50322;
+UPDATE `item_template` SET `Material` = 6, `InventoryType` = 8, `displayid` = 63934 WHERE `entry` = 50323;
+UPDATE `item_template` SET `Material` = 6, `InventoryType` = 3, `displayid` = 64999 WHERE `entry` = 50324;
+UPDATE `item_template` SET `Material` = 6, `InventoryType` = 9, `displayid` = 63935 WHERE `entry` = 50330;
+UPDATE `item_template` SET `Material` = 6, `InventoryType` = 9, `displayid` = 63935 WHERE `entry` = 50331;
+UPDATE `item_template` SET `Material` = 6, `InventoryType` = 9, `displayid` = 63935 WHERE `entry` = 50332;
+UPDATE `item_template` SET `Material` = 8, `InventoryType` = 9, `displayid` = 64421 WHERE `entry` = 50333;
 
 -- Stats. displayid 1000 is the stock "question mark" placeholder: swap each
 -- model for a real WotLK displayid once the art is chosen.
@@ -186,13 +233,13 @@ REPLACE INTO `creature_template`
 VALUES
   (150001,'Малакор, Падший Король','Вестник Ноктиса',83,83,14,0,3,2000,1,0,7,100,100,1,1,'','boss_malakor',1),
   (150002,'Леди Веспера','Ткачица Теней',82,82,14,0,3,2000,1,0,7,50,100,1,1,'','boss_vespera',1),
-  (150010,'Архимаг Вальдор','Хранитель Врат',80,80,35,3,0,2000,7,0,7,1,1,1,1,'','npc_valdor_questgiver',1),
-  (150100,'Командир Лайондрел','Авангард Альянса',80,80,1801,3,0,2000,7,0,7,1,1,1,1,'','npc_lyondrel_questgiver',1),
-  (150101,'Варгок Кровавый Клык','Вождь Орды',80,80,1802,3,0,2000,7,0,7,1,1,1,1,'','npc_wargok_questgiver',1),
-  (150102,'Странник Эонис','Хранитель Равновесия',80,80,35,3,0,2000,7,0,7,1,1,1,1,'','npc_eonis_questgiver',1),
+  (150010,'Архимаг Вальдор','Хранитель Врат',80,80,35,3,0,2000,1,0,7,1,1,1,1,'','npc_valdor_questgiver',1),
+  (150100,'Командир Лайондрел','Авангард Альянса',80,80,1801,3,0,2000,1,0,7,1,1,1,1,'','npc_lyondrel_questgiver',1),
+  (150101,'Варгок Кровавый Клык','Вождь Орды',80,80,1802,3,0,2000,1,0,7,1,1,1,1,'','npc_wargok_questgiver',1),
+  (150102,'Странник Эонис','Хранитель Равновесия',80,80,35,3,0,2000,1,0,7,1,1,1,1,'','npc_eonis_questgiver',1),
   (150020,'Страж Сумерек','Защитник Алтаря',81,81,14,0,1,2000,1,0,7,20,50,1,1,'','npc_twilight_warden',1),
   (150030,'Теневой прислужник','',80,80,14,0,0,2000,1,0,7,5,10,1,1,'','npc_shadow_minion',1),
-  (150200,'Управляющий магазином Авроры','Торговец',80,80,35,3,0,2000,7,0,7,1,1,1,1,'','npc_aurora_shopkeeper',1);
+  (150200,'Управляющий магазином Авроры','Торговец',80,80,35,3,0,2000,1,0,7,1,1,1,1,'','npc_aurora_shopkeeper',1);
 
 -- ----------------------------------------------------------------------------
 -- NPC GREETINGS AND GOSSIP (project range 7000+)
@@ -524,7 +571,7 @@ VALUES
   (14,11,'participation','time',30,0,1,0,4,0,0,'Участие в Ливне','Shard Rain participation'),
   (15,11,'bronze','kills',40,0,1,0,12,0,0,'Вскрытый осколок','Cracked Shard'),
   (16,11,'silver','kills',120,0,1,25,25,0,0,'Серебро Ливня','Shard Silver'),
-  (17,11,'legendary','time',600,0,1,0,0,102,'Тень Ноктиса','Shadow of Nyctos');
+  (17,11,'legendary','time',600,0,1,0,0,0,102,'Тень Ноктиса','Shadow of Nyctos');
 
 -- ============================================================================
 -- 15. SHOP
@@ -651,14 +698,32 @@ WHERE `entry` BETWEEN 50000 AND 60099;
 -- The shopkeeper sells the whole catalogue, but five stock items are missing
 -- from item_template, so the vendor row would be dropped by the core. The
 -- visual-enchant scrolls (60001-60004) are created here.
-REPLACE INTO `item_template`
-  (`entry`,`class`,`subclass`,`name`,`displayid`,`Quality`,`Flags`,`BuyCount`,`BuyPrice`,`SellPrice`,
-   `InventoryType`,`ItemLevel`,`RequiredLevel`,`Stackable`,`bonding`,`description`)
-VALUES
-  (60001,15,0,'Свиток: Сияние Авроры',50001,4,0,1,0,0,0,1,80,1,20,1,'Визуальный энчант «Сияние Авроры»'),
-  (60002,15,0,'Свиток: Тень Ноктиса',50001,4,0,1,0,0,0,1,80,1,20,1,'Визуальный энчант «Тень Ноктиса»'),
-  (60003,15,0,'Свиток: Пламя Рассвета',50001,4,0,1,0,0,0,1,80,1,20,1,'Визуальный энчант «Пламя Рассвета»'),
-  (60004,15,0,'Свиток: Призматический Блеск',50001,5,0,1,0,0,0,1,80,1,20,1,'Визуальный энчант «Призматический Блеск»');
+-- Cloned from an existing currency row: item_template has 138 NOT NULL
+-- columns that older snapshots create without defaults, so a short column list
+-- fails on stricter MySQL builds with error 1136 (column count mismatch).
+DELETE FROM `item_template` WHERE `entry` BETWEEN 60001 AND 60004;
+
+CREATE TEMPORARY TABLE `aurora_tmp_scroll` LIKE `item_template`;
+INSERT INTO `aurora_tmp_scroll` SELECT * FROM `item_template` WHERE `entry` = 50001;
+
+UPDATE `aurora_tmp_scroll` SET `entry`=60001, `name`='Свиток: Сияние Авроры',
+  `description`='Визуальный энчант «Сияние Авроры»', `Quality`=4, `Stackable`=20,
+  `ItemLevel`=80, `RequiredLevel`=1, `BuyPrice`=0, `SellPrice`=0;
+INSERT INTO `item_template` SELECT * FROM `aurora_tmp_scroll`;
+
+UPDATE `aurora_tmp_scroll` SET `entry`=60002, `name`='Свиток: Тень Ноктиса',
+  `description`='Визуальный энчант «Тень Ноктиса»';
+INSERT INTO `item_template` SELECT * FROM `aurora_tmp_scroll`;
+
+UPDATE `aurora_tmp_scroll` SET `entry`=60003, `name`='Свиток: Пламя Рассвета',
+  `description`='Визуальный энчант «Пламя Рассвета»';
+INSERT INTO `item_template` SELECT * FROM `aurora_tmp_scroll`;
+
+UPDATE `aurora_tmp_scroll` SET `entry`=60004, `name`='Свиток: Призматический Блеск',
+  `description`='Визуальный энчант «Призматический Блеск»', `Quality`=5;
+INSERT INTO `item_template` SELECT * FROM `aurora_tmp_scroll`;
+
+DROP TEMPORARY TABLE `aurora_tmp_scroll`;
 
 -- Vendors list: the shopkeeper (150200) offers the enabled catalogue. Prices
 -- stay 0 in the vendor view because the real price is checked in C++.
