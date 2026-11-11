@@ -310,6 +310,15 @@ local MENU_TEXT = {
 
     events   = "|cffFFD100Эвенты|r\n\n" ..
                "Открыть список активных эвентов.",
+
+    lore     = "|cffFFD100Хроники|r\n\n" ..
+               "Главы кампании открываются достижениями.\n\n" ..
+               "Список: |cffffff00/aurora lore|r\n" ..
+               "Читать: |cffffff00/aurora lore read <глава>|r",
+
+    titles   = "|cffFFD100Титулы|r\n\n" ..
+               "Доступные титулы Авроры:\n" ..
+               "|cffffff00/aurora titles list|r",
 }
 
 local function ShowTab(tabId)
@@ -328,6 +337,8 @@ local TABS = {
     { id = "shop",     label = "Магазин" },
     { id = "vote",     label = "Голосование" },
     { id = "events",   label = "Эвенты" },
+    { id = "lore",     label = "Хроники" },
+    { id = "titles",   label = "Титулы" },
 }
 
 for index, tab in ipairs(TABS) do
