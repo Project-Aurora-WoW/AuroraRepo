@@ -72,3 +72,15 @@ CREATE TABLE IF NOT EXISTS `aurora_server_activity` (
   `eclipse_time`          TIMESTAMP NULL DEFAULT NULL,
   PRIMARY KEY (`date`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='Daily server activity, drives dynamic events';
+
+-- ----------------------------------------------------------------------------
+-- 5. Per-player campaign counters
+--    Lifetime totals that do not fit the activity ledger, e.g. how many
+--    altars a character has captured across all runs (achievement 10020).
+-- ----------------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS `aurora_campaign_counters` (
+  `player_guid` INT UNSIGNED NOT NULL,
+  `counter`     VARCHAR(32) NOT NULL,
+  `value`       INT UNSIGNED NOT NULL DEFAULT 0,
+  PRIMARY KEY (`player_guid`, `counter`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='Aurora campaign lifetime counters';

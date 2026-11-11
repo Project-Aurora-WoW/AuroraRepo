@@ -478,7 +478,6 @@ namespace
             "SELECT 1 FROM `aurora_votes` "
             "WHERE `voter_guid` = {} AND `category` = '{}' AND `vote_date` = CURDATE() LIMIT 1",
             voterGuid, category);
-
         if (existing)
         {
             handler.PSendSysMessage("|cffff0000[Aurora]|r %s",
@@ -494,6 +493,70 @@ namespace
 
         handler.PSendSysMessage("|cff00ff00[Aurora]|r %s",
             Tr(player, "Голос учтён.", "Vote recorded."));
+
+        return true;
+    }
+    // ------------------------------------------------------------------------
+    // .aurora campaign - progress through campaign #1
+    // ------------------------------------------------------------------------
+    bool ShowCampaign(Player* player)
+    {
+        uint32 const guid = player->GetGUID().GetCounter();
+        ChatHandler handler(player->GetSession());
+        bool const ru = IsRussian(player);
+
+        handler.PSendSysMessage("|cffFFD100=== %s ===|r",
+            ru ? "КАМПАНИЯ #1: НОЧЬ ПАДШИХ" : "CAMPAIGN #1: NIGHT OF THE FALLEN");
+
+        struct Chain
+        {
+            char const* label;
+            uint32 first;
+            uint32 last;
+        };
+
+        Chain const chains[] =
+        {
+            { ru ? "Альянс" : "Alliance", QUEST_ALLIANCE_1, QUEST_ALLIANCE_6 },
+            { ru ? "Орда"   : "Horde",    QUEST_HORDE_1,    QUEST_HORDE_6    },
+            { ru ? "Равновесие" : "Balance", QUEST_NEUTRAL_1, QUEST_NEUTRAL_6 },
+        };
+
+        for (Chain const& chain : chains)
+        {
+            uint32 done = 0;
+            uint32 total = 0;
+            for (uint32 q = chain.first; q <= chain.last; ++q, ++total)
+                if (player->GetQuestRewardStatus(q))
+                    ++done;
+
+            handler.PSendSysMessage("%s: %u/%u", chain.label, done, total);
+        }
+
+        QueryResult captured = CharacterDatabase.Query(
+            "SELECT `value` FROM `aurora_campaign_counters` "
+            "WHERE `player_guid` = {} AND `counter` = 'altar_captures'", guid);
+
+        uint32 const total = captured ? captured->Fetch()[0].Get<uint32>() : 0;
+        handler.PSendSysMessage("%s: %u",
+            ru ? "Захвачено алтарей всего" : "Altars captured total", total);
+
+        QueryResult progress = CharacterDatabase.Query(
+            "SELECT `completed_at`, `no_death` FROM `aurora_player_progress` "
+            "WHERE `player_guid` = {} AND `campaign_id` = 1", guid);
+
+        if (progress)
+        {
+            Field* fields = progress->Fetch();
+            handler.PSendSysMessage("|cff00ff00%s|r %s",
+                ru ? "Кампания пройдена:" : "Campaign completed:",
+                fields[0].Get<std::string>().c_str());
+        }
+        else
+        {
+            handler.SendSysMessage(ru ? "|cffff8800Кампания ещё не завершена.|r"
+                                      : "|cffff8800Campaign not finished yet.|r");
+        }
 
         return true;
     }
@@ -532,6 +595,7 @@ public:
             { "shop",     shopCommands },
             { "vote",     voteCommands },
             { "reload",   reloadCommands },
+            { "campaign", HandleCampaignCommand, rbac::RBAC_PERM_COMMAND_HELP, Console::No },
             { "activity", HandleActivityCommand, rbac::RBAC_PERM_COMMAND_HELP, Console::No },
             { "version",  HandleVersionCommand,  rbac::RBAC_PERM_COMMAND_HELP, Console::Yes },
         };
@@ -548,6 +612,12 @@ private:
     static Player* GetPlayer(ChatHandler* handler)
     {
         return handler->GetSession() ? handler->GetSession()->GetPlayer() : nullptr;
+    }
+
+    static bool HandleCampaignCommand(ChatHandler* handler)
+    {
+        Player* player = GetPlayer(handler);
+        return player ? ShowCampaign(player) : false;
     }
 
     static bool HandleVersionCommand(ChatHandler* handler)
