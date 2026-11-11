@@ -63,21 +63,21 @@ class StrTab:
 # ---------------------------------------------------------------- achievements
 # id, points, icon(SpellIcon id), categoryId, description-en, description-ru
 ACHIEVEMENTS = [
-    (10001, 10, 617, "First Step of Aurora", "First entry into the Night of the Fallen map.", 5),
-    (10002, 20, 516, "Fall of Malakor", "Defeat Malakor in the Night of the Fallen.", 10),
-    (10003, 30, 516, "Hero of the Night", "Defeat Malakor on heroic difficulty.", 10),
-    (10004, 20, 599, "Night Without Losses", "Clear the Night of the Fallen without a single death.", 10),
-    (10010, 10, 583, "Shield Bearer", "Break the Twilight Shield within five minutes.", 10),
-    (10013, 20, 605, "Faster Than Dark", "Clear the Night of the Fallen within thirty minutes.", 10),
-    (10014, 30, 488, "Solo Hero", "Defeat the Twilight Warden without a group.", 10),
-    (10020, 10, 592, "Altar Capturer", "Capture ten shadow altars across all runs.", 10),
-    (10022, 20, 592, "Lone Wolf", "Capture three altars alone in a single run.", 10),
-    (10024, 25, 592, "Dominion", "Hold all four altars at once.", 10),
-    (10030, 10, 603, "Path of Light", "Complete the Alliance quest chain of the campaign.", 10),
-    (10031, 10, 603, "Path of Blood", "Complete the Horde quest chain of the campaign.", 10),
-    (10032, 10, 603, "Path of Balance", "Complete the neutral quest chain of the campaign.", 10),
-    (10033, 25, 603, "Triple Agent", "Complete all three quest chains of the campaign.", 10),
-    (10099, 50, 571, "Hero of the Fallen Night", "Complete every achievement of the campaign.", 50),
+    (10001, 10, 617, "First Step of Aurora", "Первый шаг Авроры", "First entry into the Night of the Fallen map.", "Первый вход на карту «Ночь Падших».", 5),
+    (10002, 20, 516, "Fall of Malakor", "Падение Малакора", "Defeat Malakor in the Night of the Fallen.", "Победите Малакора в Ночи Падших.", 10),
+    (10003, 30, 516, "Hero of the Night", "Герой Ночи", "Defeat Malakor on heroic difficulty.", "Победите Малакора на героической сложности.", 10),
+    (10004, 20, 599, "Night Without Losses", "Ночь без потерь", "Clear the Night of the Fallen without a single death.", "Пройдите Ночь Падших без единой смерти.", 10),
+    (10010, 10, 583, "Shield Bearer", "Щитоносец", "Break the Twilight Shield within five minutes.", "Снимите Сумеречный щит за пять минут.", 10),
+    (10013, 20, 605, "Faster Than Dark", "Быстрее тьмы", "Clear the Night of the Fallen within thirty minutes.", "Пройдите Ночь Падших за тридцать минут.", 10),
+    (10014, 30, 488, "Solo Hero", "Соло-герой", "Defeat the Twilight Warden without a group.", "Победите Сумеречного Стража без группы.", 10),
+    (10020, 10, 592, "Altar Capturer", "Захватчик алтарей", "Capture ten shadow altars across all runs.", "Захватите десять теневых алтарей за все прохождения.", 10),
+    (10022, 20, 592, "Lone Wolf", "Одинокий волк", "Capture three altars alone in a single run.", "Захватите три алтаря в одиночку за один проход.", 10),
+    (10024, 25, 592, "Dominion", "Доминион", "Hold all four altars at once.", "Удержите все четыре алтаря одновременно.", 10),
+    (10030, 10, 603, "Path of Light", "Путь Света", "Complete the Alliance quest chain of the campaign.", "Пройдите цепочку квестов Альянса в кампании.", 10),
+    (10031, 10, 603, "Path of Blood", "Путь Крови", "Complete the Horde quest chain of the campaign.", "Пройдите цепочку квестов Орды в кампании.", 10),
+    (10032, 10, 603, "Path of Balance", "Путь Равновесия", "Complete the neutral quest chain of the campaign.", "Пройдите нейтральную цепочку квестов кампании.", 10),
+    (10033, 25, 603, "Triple Agent", "Тройной агент", "Complete all three quest chains of the campaign.", "Пройдите все три цепочки квестов кампании.", 10),
+    (10099, 50, 571, "Hero of the Fallen Night", "Герой Ночи Падших", "Complete every achievement of the campaign.", "Получите все достижения кампании.", 50),
 ]
 
 # Quest ids used by the three chains, kept in aurora_campaign01_quests
@@ -120,7 +120,7 @@ def main():
     existing = {r[0] for r in rows}
     st = StrTab(strtab)
 
-    for aid, points, icon, name_en, desc_en, pts_cat in ACHIEVEMENTS:
+    for aid, points, icon, name_en, name_ru, desc_en, desc_ru, pts_cat in ACHIEVEMENTS:
         if aid in existing:
             print("skip existing achievement", aid)
             continue
@@ -130,34 +130,21 @@ def main():
         row[2] = -1                      # mapID: none
         row[3] = 0                       # parentAchievement
         row[4] = st.add(name_en)         # name enUS
-        row[5] = 0                       # ruRU filled below
-        row[20] = 16712190               # name flags (mask 0xff1f3fe -> effect sound)
-        row[21] = 0                      # description enUS
-        row[37] = 16712190
-        row[38] = pts_cat                # categoryId (custom campaign category)
+        row[5] = st.add(name_ru)         # name ruRU = enUS slot + 1
+        row[20] = 16712190               # name flags 0x00FF01FE
+        row[21] = st.add(desc_en)        # description enUS
+        row[22] = st.add(desc_ru)        # description ruRU = enUS slot + 1
+        row[37] = 16712190               # description flags
+        row[38] = pts_cat                # categoryId
         row[39] = points
         row[40] = 1
         row[41] = 0                      # flags
         row[42] = icon                   # icon SpellIcon
         row[43] = 0                      # title reward string
         row[59] = 16712174
-        row[60] = 1                      # count of required criteria
+        row[60] = 1                      # required criteria count
         row[61] = 0                      # refAchievement
         rows.append(row)
-
-    # Russian name goes to the ruRU slot of the same string flags block.
-    # The client picks the column by its own locale: enUS=0, ruRU=4 in the
-    # shared 16-slot block resolved through the flags mask. ruRU lives at +4.
-    for row in rows:
-        aid = row[0]
-        meta = next((a for a in ACHIEVEMENTS if a[0] == aid), None)
-        if not meta:
-            continue
-        name_en, desc_en = meta[3], meta[4]
-        row[4] = st.add(name_en)
-        row[5] = 0
-        row[21] = st.add(desc_en)
-        row[22] = 0
 
     write_dbc(os.path.join(OUT_DIR, ACH), rows, fields, st.buf)
     print("Achievement.dbc: %d rows" % len(rows))
@@ -201,8 +188,10 @@ def main():
         row[0] = tid
         row[1] = 0
         row[2] = tst.add(en_m)
+        row[3] = tst.add(ru_m)          # male ruRU = enUS slot + 1
         row[18] = 16712190
         row[19] = tst.add(en_f)
+        row[20] = tst.add(ru_f)         # female ruRU = enUS slot + 1
         row[35] = 16712190
         row[36] = next_bit
         trows.append(row)
