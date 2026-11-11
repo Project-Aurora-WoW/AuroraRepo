@@ -586,7 +586,14 @@ private:
 
         WorldDatabase.Execute(
             "UPDATE `aurora_active_events` SET `status` = 'cancelled' "
-            "WHERE `id` = {} AND `status` = 'active'", active.rowId);
+            "WHERE `id` = {} AND `status` = 'active'",
+            active.rowId);
+
+        // The instance ran and players took part, so the participation they
+        // earned is paid out instead of being silently dropped. Only the
+        // time-based tiers can be reached before the scheduled end, which is
+        // exactly what `AuroraGrantEventRewards` re-checks per player.
+        AuroraGrantEventRewards(active.rowId, eventId);
 
         SetWorldState(itr->second, 0);
         Announce(itr->second, false);
