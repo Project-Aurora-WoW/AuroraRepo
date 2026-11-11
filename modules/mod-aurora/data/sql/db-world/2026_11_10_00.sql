@@ -256,7 +256,22 @@ CREATE TABLE IF NOT EXISTS `aurora_lore_chronicles` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- ----------------------------------------------------------------------------
--- 1.11. Gossip menu item texts (bilingual; edited in DB, no server rebuild)
+-- ----------------------------------------------------------------------------
+-- 1.11. Active event instances (world-scoped scheduler state)
+-- Written by the event scheduler only; per-player progress lives in the
+-- character database (`aurora_event_progress`).
+-- ----------------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS `aurora_active_events` (
+  `id`            INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `event_id`      INT UNSIGNED NOT NULL,
+  `started_at`    TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `ends_at`       TIMESTAMP NOT NULL,
+  `status`        ENUM('active','completed','cancelled') NOT NULL DEFAULT 'active',
+  PRIMARY KEY (`id`),
+  KEY `idx_status` (`status`, `ends_at`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- 1.12. Gossip menu item texts (bilingual; edited in DB, no server rebuild)
 -- One row per gossip item per NPC. `action` is the C++-side action identifier
 -- ('chain' / 'leave'); `sort_order` controls the display order per NPC.
 -- ----------------------------------------------------------------------------

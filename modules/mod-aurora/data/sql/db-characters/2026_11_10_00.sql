@@ -154,15 +154,7 @@ CREATE TABLE IF NOT EXISTS `aurora_vote_winners` (
 -- ----------------------------------------------------------------------------
 -- 2.6. Event participation
 -- ----------------------------------------------------------------------------
-CREATE TABLE IF NOT EXISTS `aurora_active_events` (
-  `id`            INT UNSIGNED NOT NULL AUTO_INCREMENT,
-  `event_id`      INT UNSIGNED NOT NULL,
-  `started_at`    TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `ends_at`       TIMESTAMP NOT NULL,
-  `status`        ENUM('active','completed','cancelled') NOT NULL DEFAULT 'active',
-  PRIMARY KEY (`id`),
-  KEY `idx_status` (`status`, `ends_at`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 
 CREATE TABLE IF NOT EXISTS `aurora_event_progress` (
   `active_event_id`   INT UNSIGNED NOT NULL,
@@ -175,8 +167,7 @@ CREATE TABLE IF NOT EXISTS `aurora_event_progress` (
   `points_earned`     INT UNSIGNED NOT NULL DEFAULT 0,
   `last_update`       TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`active_event_id`, `player_guid`),
-  CONSTRAINT `fk_evprog_active` FOREIGN KEY (`active_event_id`)
-    REFERENCES `aurora_active_events` (`id`) ON DELETE CASCADE
+  KEY `idx_active_event` (`active_event_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE IF NOT EXISTS `aurora_event_claims` (
