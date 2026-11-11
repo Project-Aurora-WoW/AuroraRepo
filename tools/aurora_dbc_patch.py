@@ -106,8 +106,26 @@ CRITERIA = [
 ]
 
 # Titles: id, ru male, ru female, en male, en female, achievement
+# Ids 5001..5016 mirror `aurora_titles.title_dbc_id` in sql/02_aurora_world_data.sql.
 CAMPAIGN_TITLES = [
     (180, "Герой Ночи Падших", "Героиня Ночи Падших", "Hero of the Fallen Night", "Heroine of the Fallen Night", 10099),
+
+    (5001, "Неустрашимый", "Неустрашимая", "the Fearless", "the Fearless", 10004),
+    (5002, "Быстрее Тени", "Быстрее Тени", "Faster than Shadow", "Faster than Shadow", 10013),
+    (5003, "Одинокий Волк", "Одинокая Волчица", "the Lone Wolf", "the Lone Wolf", 10022),
+    (5004, "Тройной Агент", "Тройной Агент", "the Triple Agent", "the Triple Agent", 10033),
+    (5005, "Герой Ночи Падших", "Героиня Ночи Падших", "Hero of the Fallen Night", "Heroine of the Fallen Night", 10099),
+    (5006, "Искатель Авроры", "Искательница Авроры", "Seeker of Aurora", "Seeker of Aurora", 20001),
+    (5007, "Хранитель Авроры", "Хранительница Авроры", "Keeper of Aurora", "Keeper of Aurora", 20002),
+    (5008, "Глас Авроры", "Глас Авроры", "Voice of Aurora", "Voice of Aurora", 20003),
+    (5009, "Верный Хранитель", "Верная Хранительница", "the Loyal Keeper", "the Loyal Keeper", 0),
+    (5010, "Герой PvE", "Героиня PvE", "PvE Hero", "PvE Hero", 0),
+    (5011, "Герой PvP", "Героиня PvP", "PvP Hero", "PvP Hero", 0),
+    (5012, "Душа Авроры", "Душа Авроры", "Soul of Aurora", "Soul of Aurora", 0),
+    (5013, "Помнящий", "Помнящая", "the Remembrancer", "the Remembrancer", 0),
+    (5014, "Соратник PvP", "Соратница PvP", "PvP Companion", "PvP Companion", 0),
+    (5015, "Участник PvP", "Участница PvP", "PvP Participant", "PvP Participant", 0),
+    (5016, "Помощник Авроры", "Помощница Авроры", "Aurora Helper", "Aurora Helper", 0),
 ]
 
 
