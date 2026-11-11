@@ -185,84 +185,42 @@ VALUES
 
 -- ---------------------------------------------------------------- ALLIANCE ---
 REPLACE INTO `quest_template`
-  (`ID`,`QuestType`,`QuestLevel`,`MinLevel`,`MaxLevel`,`AllowableRaces`,`RewardNextQuest`,
-   `RewardXPDifficulty`,`RewardMoney`,`RewardItem1`,`RewardAmount1`,
-   `LogTitle`,`LogDescription`,`QuestDescription`,
-   `RequiredNpcOrGo1`,`RequiredNpcOrGoCount1`,`RequiredItemId1`,`RequiredItemCount1`,
-   `AreaDescription`,`QuestFlags`)
+  (`ID`,`QuestType`,`QuestLevel`,`MinLevel`,`AllowableRaces`,`Flags`,`RewardNextQuest`,`RewardXPDifficulty`,`RewardMoney`,`RewardItem1`,`RewardAmount1`,`LogTitle`,`LogDescription`,`QuestDescription`,`RequiredNpcOrGo1`,`RequiredNpcOrGoCount1`,`RequiredItemId1`,`RequiredItemCount1`,`AreaDescription`)
 VALUES
-  (90001,2,80,80,80,1101,90002,0,0,50010,1,
-   'Зов Ночи','Найди Архимага Вальдора','Командир Лайондрел посылает тебя к Вальдору.',
-   150010,1,0,0,'',0),
-  (90002,2,80,80,80,1101,90003,1,25000,50001,5,
-   'Первые тени','Убей 10 Теневых прислужников','Очисти путь от теней.',
-   150030,10,0,0,'',0),
-  (90003,2,80,80,80,1101,90004,2,50000,50001,15,
-   'Алтари Сумерек','Захвати 3 алтаря','Захвати алтари силой Света.',
-   150002,3,0,0,'',0),
-  (90004,2,80,80,80,1101,90005,5,100000,50030,1,
-   'Падший Король','Убей Малакора','Сразись с Падшим Королём.',
-   150001,1,0,0,'',0),
-  (90005,2,80,80,80,1101,90006,3,150000,50020,1,
-   'Осколок надежды','Принеси 50 осколков','Собери осколки для командира.',
-   0,0,50001,50,'',0),
-  (90006,2,80,80,80,1101,0,0,200000,50050,1,
-   'Наследие ночи','Используй медальон в зоне алтарей','Заверши путь Света.',
-   0,0,0,0,'',0);
+  (90001,2,80,80,1101,0,90002,0,0,50010,1,'Зов Ночи','Найди Архимага Вальдора','Командир Лайондрел посылает тебя к Вальдору.',150010,1,0,0,''),
+  (90002,2,80,80,1101,0,90003,1,25000,50001,5,'Первые тени','Убей 10 Теневых прислужников','Очисти путь от теней.',150030,10,0,0,''),
+  (90003,2,80,80,1101,0,90004,2,50000,50001,15,'Алтари Сумерек','Захвати 3 алтаря','Захвати алтари силой Света.',150002,3,0,0,''),
+  (90004,2,80,80,1101,0,90005,5,100000,50030,1,'Падший Король','Убей Малакора','Сразись с Падшим Королём.',150001,1,0,0,''),
+  (90005,2,80,80,1101,0,90006,3,150000,50020,1,'Осколок надежды','Принеси 50 осколков','Собери осколки для командира.',0,0,50001,50,''),
+  (90006,2,80,80,1101,0,0,0,200000,50050,1,'Наследие ночи','Используй медальон в зоне алтарей','Заверши путь Света.',0,0,0,0,'');
+
+
 
 -- ---------------------------------------------------------------- HORDE ------
 REPLACE INTO `quest_template`
-  (`ID`,`QuestType`,`QuestLevel`,`MinLevel`,`MaxLevel`,`AllowableRaces`,`RewardNextQuest`,
-   `RewardXPDifficulty`,`RewardMoney`,`RewardItem1`,`RewardAmount1`,
-   `LogTitle`,`LogDescription`,`QuestDescription`,
-   `RequiredNpcOrGo1`,`RequiredNpcOrGoCount1`,`RequiredItemId1`,`RequiredItemCount1`,
-   `AreaDescription`,`QuestFlags`)
+  (`ID`,`QuestType`,`QuestLevel`,`MinLevel`,`AllowableRaces`,`Flags`,`RewardNextQuest`,`RewardXPDifficulty`,`RewardMoney`,`RewardItem1`,`RewardAmount1`,`LogTitle`,`LogDescription`,`QuestDescription`,`RequiredNpcOrGo1`,`RequiredNpcOrGoCount1`,`RequiredItemId1`,`RequiredItemCount1`,`AreaDescription`)
 VALUES
-  (90011,2,80,80,80,690,90012,0,0,50011,1,
-   'Зов Ночи','Найди Вальдора','Варгок посылает тебя к Вальдору.',
-   150010,1,0,0,'',0),
-  (90012,2,80,80,80,690,90013,1,25000,50001,5,
-   'Первые тени','Убей 10 прислужников','Очисти путь от теней.',
-   150030,10,0,0,'',0),
-  (90013,2,80,80,80,690,90014,2,50000,50001,15,
-   'Алтари Сумерек','Оскверни 3 алтаря','Оскверни алтари силой Орды.',
-   150002,3,0,0,'',0),
-  (90014,2,80,80,80,690,90015,5,100000,50031,1,
-   'Падший Король','Убей Малакора','Сразись с Падшим Королём.',
-   150001,1,0,0,'',0),
-  (90015,2,80,80,80,690,90016,3,150000,50021,1,
-   'Осколок надежды','Принеси 50 осколков','Принеси 50 осколков Варгоку.',
-   0,0,50001,50,'',0),
-  (90016,2,80,80,80,690,0,0,200000,50051,1,
-   'Наследие ночи','Используй тотем','Заверши путь Орды.',
-   0,0,0,0,'',0);
+  (90011,2,80,80,80,690,90012,0,0,50011,1,'Зов Ночи','Найди Вальдора','Варгок посылает тебя к Вальдору.',150010,1,0,0,''),
+  (90012,2,80,80,80,690,90013,1,25000,50001,5,'Первые тени','Убей 10 прислужников','Очисти путь от теней.',150030,10,0,0,''),
+  (90013,2,80,80,80,690,90014,2,50000,50001,15,'Алтари Сумерек','Оскверни 3 алтаря','Оскверни алтари силой Орды.',150002,3,0,0,''),
+  (90014,2,80,80,80,690,90015,5,100000,50031,1,'Падший Король','Убей Малакора','Сразись с Падшим Королём.',150001,1,0,0,''),
+  (90015,2,80,80,80,690,90016,3,150000,50021,1,'Осколок надежды','Принеси 50 осколков','Принеси 50 осколков Варгоку.',0,0,50001,50,''),
+  (90016,2,80,80,80,690,0,0,200000,50051,1,'Наследие ночи','Используй тотем','Заверши путь Орды.',0,0,0,0,'');
+
+
 
 -- ---------------------------------------------------------------- NEUTRAL ----
 REPLACE INTO `quest_template`
-  (`ID`,`QuestType`,`QuestLevel`,`MinLevel`,`MaxLevel`,`AllowableRaces`,`RewardNextQuest`,
-   `RewardXPDifficulty`,`RewardMoney`,`RewardItem1`,`RewardAmount1`,
-   `LogTitle`,`LogDescription`,`QuestDescription`,
-   `RequiredNpcOrGo1`,`RequiredNpcOrGoCount1`,`RequiredItemId1`,`RequiredItemCount1`,
-   `AreaDescription`,`QuestFlags`)
+  (`ID`,`QuestType`,`QuestLevel`,`MinLevel`,`AllowableRaces`,`Flags`,`RewardNextQuest`,`RewardXPDifficulty`,`RewardMoney`,`RewardItem1`,`RewardAmount1`,`LogTitle`,`LogDescription`,`QuestDescription`,`RequiredNpcOrGo1`,`RequiredNpcOrGoCount1`,`RequiredItemId1`,`RequiredItemCount1`,`AreaDescription`)
 VALUES
-  (90021,2,80,80,80,1023,90022,0,10000,50022,1,
-   'Баланс нарушен','Войди в «Ночь Падших»','Баланс нарушен. Войди в подземелье.',
-   0,0,0,0,'',0),
-  (90022,2,80,80,80,1023,90023,1,30000,50001,10,
-   'Жертва ради равновесия','Убей 15 прислужников без PvP-урона','Убей 15 прислужников, не получая урона от игроков.',
-   150030,15,0,0,'',0),
-  (90023,2,80,80,80,1023,90024,2,50000,50001,15,
-   'Три стороны медали','Захвати 3 алтаря лично','Захвати алтари без помощи группы.',
-   150002,3,0,0,'',0),
-  (90024,2,80,80,80,1023,90025,5,120000,50040,1,
-   'Истинный враг','Нанеси не менее 15% урона Малакору','Внеси вклад в победу над Падшим Королём.',
-   150001,1,0,0,'',0),
-  (90025,2,80,80,80,1023,90026,3,180000,50023,1,
-   'Хранитель равновесия','Принеси 100 осколков','Принеси 100 осколков Эонису.',
-   0,0,50001,100,'',0),
-  (90026,2,80,80,80,1023,0,0,250000,50060,1,
-   'Вечная ночь','Заверши путь Странника','Заверши все квесты нейтральной цепочки.',
-   0,0,0,0,'',0);
+  (90021,2,80,80,80,1023,90022,0,10000,50022,1,'Баланс нарушен','Войди в «Ночь Падших»','Баланс нарушен. Войди в подземелье.',0,0,0,0,''),
+  (90022,2,80,80,80,1023,90023,1,30000,50001,10,'Жертва ради равновесия','Убей 15 прислужников без PvP-урона','Убей 15 прислужников, не получая урона от игроков.',150030,15,0,0,''),
+  (90023,2,80,80,80,1023,90024,2,50000,50001,15,'Три стороны медали','Захвати 3 алтаря лично','Захвати алтари без помощи группы.',150002,3,0,0,''),
+  (90024,2,80,80,80,1023,90025,5,120000,50040,1,'Истинный враг','Нанеси не менее 15% урона Малакору','Внеси вклад в победу над Падшим Королём.',150001,1,0,0,''),
+  (90025,2,80,80,80,1023,90026,3,180000,50023,1,'Хранитель равновесия','Принеси 100 осколков','Принеси 100 осколков Эонису.',0,0,50001,100,''),
+  (90026,2,80,80,80,1023,0,0,250000,50060,1,'Вечная ночь','Заверши путь Странника','Заверши все квесты нейтральной цепочки.',0,0,0,0,'');
+
+
 
 -- second reward for 90026 (torch)
 UPDATE `quest_template` SET `RewardItem2`=50061, `RewardAmount2`=1 WHERE `ID`=90026;
@@ -270,12 +228,12 @@ UPDATE `quest_template` SET `RewardItem2`=50061, `RewardAmount2`=1 WHERE `ID`=90
 UPDATE `quest_template` SET `RewardItem2`=50001, `RewardAmount2`=20 WHERE `ID` IN (90004,90014);
 
 -- faction/reputation rewards
-UPDATE `quest_template` SET `RewardFactionId1`=350001, `RewardFactionValueId1`=100 WHERE `ID`=90021;
-UPDATE `quest_template` SET `RewardFactionId1`=350001, `RewardFactionValueId1`=300 WHERE `ID`=90022;
-UPDATE `quest_template` SET `RewardFactionId1`=350001, `RewardFactionValueId1`=600 WHERE `ID`=90023;
-UPDATE `quest_template` SET `RewardFactionId1`=350001, `RewardFactionValueId1`=1200 WHERE `ID`=90024;
-UPDATE `quest_template` SET `RewardFactionId1`=350001, `RewardFactionValueId1`=900 WHERE `ID`=90025;
-UPDATE `quest_template` SET `RewardFactionId1`=350001, `RewardFactionValueId1`=600 WHERE `ID`=90026;
+UPDATE quest_template SET `RewardFactionValue1`=100 WHERE `ID`=90021;
+UPDATE quest_template SET `RewardFactionValue1`=300 WHERE `ID`=90022;
+UPDATE quest_template SET `RewardFactionValue1`=600 WHERE `ID`=90023;
+UPDATE quest_template SET `RewardFactionValue1`=1200 WHERE `ID`=90024;
+UPDATE quest_template SET `RewardFactionValue1`=900 WHERE `ID`=90025;
+UPDATE quest_template SET `RewardFactionValue1`=600 WHERE `ID`=90026;
 
 -- quest givers (quest_template does not store giver: vendored via creature_queststarter)
 REPLACE INTO `creature_queststarter` (`id`,`quest`) VALUES
@@ -558,3 +516,8 @@ VALUES
      'Альянс видит в Малакоре угрозу. Орда — соперника. Но Эонис знает: истинная победа — не в уничтожении, а в очищении. Три пути ведут к одной цели. Какой выберешь ты?',
      'The Alliance sees Malakor as a threat. The Horde sees a rival. But Eonis knows: true victory lies not in destruction, but in purification. Three paths lead to one goal. Which will you choose?',
      10033);
+
+
+
+
+
