@@ -30,6 +30,7 @@ set(AURORA_CORE_SOURCES
     ${AURORA_ROOT_DIR}/src/Aurora/Core/aurora_settings.cpp
     ${AURORA_ROOT_DIR}/src/Aurora/Core/aurora_daily_quests.cpp
     ${AURORA_ROOT_DIR}/src/Aurora/Core/aurora_campaigns.cpp
+    ${AURORA_ROOT_DIR}/src/Aurora/Core/aurora_item_sets.cpp
 )
 
 set(AURORA_CAMPAIGN01_DIR ${AURORA_ROOT_DIR}/src/Aurora/Campaigns/Campaign01_NightOfTheFallen)

@@ -20,6 +20,8 @@
 | `data/sql/db-world/2026_11_10_11.sql` | WORLD | Перенос кампании #1 на карту 951. |
 | `data/sql/db-characters/2026_11_10_09.sql` | CHARACTER | Состояние ежедневных поручений `aurora_daily_quests`. |
 | `data/sql/db-characters/2026_11_10_10.sql` | CHARACTER | Счётчики продаж магазина `aurora_shop_sales`. |
+| `data/sql/db-world/2026_11_10_12.sql` | WORLD | Пассивные спеллы сетовых бонусов 600100–600105 в `spell_dbc` + `item_template.setID` для наборов 5300–5302. |
+| `data/sql/db-world/2026_11_10_13.sql` | WORLD | Определения сетов `aurora_item_sets` и бонусов `aurora_item_set_bonuses` для серверной реализации. |
 
 ## Правило разделения баз
 

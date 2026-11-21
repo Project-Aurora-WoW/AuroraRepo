@@ -12,6 +12,27 @@ OUT_DIR = _OUT_DIR_DEFAULT
 ACH = "Achievement.dbc"
 CRIT = "Achievement_Criteria.dbc"
 TITLES = "CharTitles.dbc"
+ITEMSET = "ItemSet.dbc"
+
+# ItemSet.dbc in 3.3.5a: 53 fields, 8 (ItemID, SpellID) pairs, 4 spell slots
+# used by the client tooltip (SpellID[0..3]) and 4 reserved for SetItemSetData.
+ITEMSET_FIELDS = 53
+ITEMSET_SLOTS = 8
+
+# Campaign sets. `setID` in item_template points here; the spells are the
+# passive auras from db-world 2026_11_10_12.sql, applied by the server.
+# id, name, items[5], spells[(pieces, spell) ...]
+CAMPAIGN_SETS = [
+    (5300, "Страж Рассвета", "Dawn Warden",
+     [50300, 50301, 50302, 50303, 50304],
+     [(2, 600100), (5, 600101)]),
+    (5301, "Теневой Охотник", "Shadow Hunter",
+     [50310, 50311, 50312, 50313, 50314],
+     [(2, 600102), (5, 600103)]),
+    (5302, "Весталка", "Vestal",
+     [50320, 50321, 50322, 50323, 50324],
+     [(2, 600104), (5, 600105)]),
+]
 
 
 def read_dbc(path):
@@ -247,6 +268,57 @@ def main():
         next_bit += 1
     write_dbc(os.path.join(OUT_DIR, TITLES), trows, tfields, tst.buf)
     print("CharTitles.dbc: %d rows, next bit %d" % (len(trows), next_bit))
+
+    # --------------------------------------------------------------- ItemSet
+    # ItemSet.dbc is not part of the repository (it lives inside the client's
+    # MPQs), so the base file is optional: with --dbc-dir pointing at an
+    # extracted client the existing rows are kept and ours appended; without
+    # it a file containing only the three campaign sets is written.
+    iset_base = os.path.join(DBC_DIR, ITEMSET) if DBC_DIR else ""
+    if iset_base and os.path.isfile(iset_base):
+        irows, ifields, istrtab = read_dbc(iset_base)
+        assert ifields == ITEMSET_FIELDS, (ITEMSET_FIELDS, ifields)
+    else:
+        irows, ifields = [], ITEMSET_FIELDS
+        istrtab = b"\x00"
+        print("note: %s not found, writing campaign sets only" % ITEMSET)
+
+    iexisting = {r[0] for r in irows}
+    ist = StrTab(istrtab)
+
+    # Pattern-based layout: id, 17 item ids (ItemID[0..16]), 17 spell ids,
+    # 4 strings, 3 ints. Fields 18..34 hold the SpellID slots; the client
+    # reads its four tooltip lines from slots 0..3 and the remaining slots
+    # are used by SetItemSetData. Names go into the enUS and ruRU columns of
+    # the localised string block.
+    for set_id, name_ru, name_en, items, spells in CAMPAIGN_SETS:
+        if set_id in iexisting:
+            print("skip existing item set", set_id)
+            continue
+        if len(items) > ITEMSET_SLOTS:
+            raise SystemExit("set %d has %d items, DBC allows %d"
+                             % (set_id, len(items), ITEMSET_SLOTS))
+        if len(spells) > ITEMSET_SLOTS:
+            raise SystemExit("set %d has %d bonuses, DBC allows %d"
+                             % (set_id, len(spells), ITEMSET_SLOTS))
+
+        row = [0] * ITEMSET_FIELDS
+        row[0] = set_id
+        for i, entry in enumerate(items):
+            row[1 + i] = entry
+        for i, (_, spell) in enumerate(spells):
+            row[18 + i] = spell
+        row[35] = ist.add(name_en)       # name enUS
+        row[36] = ist.add(name_ru)       # name ruRU = enUS slot + 1
+        row[37] = 0                      # SetFlags
+        row[38] = 0                      # RequiredSkill
+        row[39] = 0                      # RequiredSkillRank
+        row[44] = 16712190               # name flags 0x00FF01FE
+        irows.append(row)
+        iexisting.add(set_id)
+
+    write_dbc(os.path.join(OUT_DIR, ITEMSET), irows, ifields, ist.buf)
+    print("ItemSet.dbc: %d rows" % len(irows))
 
 
 if __name__ == "__main__":

@@ -144,7 +144,11 @@ Aurora.Localization.Default = ruRU
   `#include "StringFormat.h"` (уже включён);
 - `player->CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, entry, count)` — модуль
   использует вариант с `ItemPosCountVec dest`, он же нужен для `StoreNewItem`;
-- `Field::IsNull()` — присутствует с AC 2022+.
+- `Field::IsNull()` — присутствует с AC 2022+;
+- `ItemTemplate::ItemSet` — поле сеты в `item_template`, читается
+  `aurora_item_sets.cpp`;
+- `ObjectAccessor::GetPlayers()` — перебор онлайн-игроков для периодической
+  проверки сетовых бонусов.
 
 Если что-то из этого не совпадёт с вашей ревизией — пришлите вывод компилятора.
 

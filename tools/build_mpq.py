@@ -19,7 +19,7 @@ REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DBC_SRC = os.path.join(REPO, "dbc")
 OUT_MPQ = os.path.join(REPO, "mpq", "patch-Z.MPQ")
 
-FILES = ["Achievement.dbc", "Achievement_Criteria.dbc", "CharTitles.dbc"]
+FILES = ["Achievement.dbc", "Achievement_Criteria.dbc", "CharTitles.dbc", "ItemSet.dbc"]
 
 MPQ_FILE_COMPRESS = 0x00000200
 MPQ_FILE_EXISTS = 0x80000000
